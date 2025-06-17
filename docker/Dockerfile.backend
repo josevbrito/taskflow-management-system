@@ -1,5 +1,0 @@
-FROM php:8.2-fpm
-WORKDIR /var/www
-COPY backend/ .
-RUN composer install --optimize-autoloader --no-dev
-EXPOSE 9000
