@@ -1,0 +1,191 @@
+<template>
+  <div class="p-6 bg-white rounded-lg shadow-xl">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Meu Perfil</h1>
+
+    <div v-if="user" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Informações do Usuário -->
+      <div class="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Informações Pessoais</h2>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Nome:</label>
+          <p class="text-gray-900 text-lg">{{ user.name }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+          <p class="text-gray-900 text-lg">{{ user.email }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Função:</label>
+          <p class="text-gray-900 text-lg capitalize">{{ user.role }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Último Login:</label>
+          <p class="text-gray-900 text-lg">{{ user.last_login_at ? formatDate(user.last_login_at) : 'N/A' }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">IP do Último Login:</label>
+          <p class="text-gray-900 text-lg">{{ user.last_login_ip || 'N/A' }}</p>
+        </div>
+      </div>
+
+      <!-- Configurações de Segurança e 2FA -->
+      <div class="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Segurança (Autenticação de 2 Fatores)</h2>
+
+        <div v-if="!user.is_2fa_enabled" class="mb-6">
+          <p class="text-gray-700 mb-4">A autenticação de 2 fatores (2FA) está desabilitada. Habilite-a para aumentar a segurança da sua conta.</p>
+          <button @click="enable2Fa" :disabled="isLoading2Fa" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200">
+            <span v-if="isLoading2Fa">Gerando QR Code...</span>
+            <span v-else>Habilitar 2FA</span>
+          </button>
+        </div>
+
+        <div v-else class="mb-6">
+          <p class="text-green-700 font-semibold mb-4">A autenticação de 2 fatores (2FA) está Habilitada.</p>
+          <button @click="showDisable2FaModal = true" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200">
+            Desabilitar 2FA
+          </button>
+        </div>
+
+        <div v-if="qrCodeUrl" class="mt-6 p-4 bg-white border border-gray-300 rounded-lg text-center shadow-inner">
+          <p class="text-gray-700 font-semibold mb-3">Escaneie o QR Code com seu aplicativo Google Authenticator:</p>
+          <img :src="qrCodeUrl" alt="QR Code 2FA" class="mx-auto w-48 h-48 border border-gray-300 rounded-md p-2">
+          <p class="text-gray-700 text-sm mt-3">Ou insira o código manualmente:</p>
+          <p class="text-indigo-600 font-mono text-lg select-all break-all">{{ google2FaSecret }}</p>
+        </div>
+
+        <p v-if="errorMessage" class="text-red-500 text-sm mt-4">{{ errorMessage }}</p>
+        <p v-if="successMessage" class="text-green-500 text-sm mt-4">{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Modal para desabilitar 2FA -->
+    <div v-if="showDisable2FaModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Desabilitar 2FA</h2>
+        <p class="text-gray-700 mb-4">Para desabilitar a autenticação de 2 fatores, por favor, insira sua senha:</p>
+        <div class="mb-4">
+          <label for="password-disable-2fa" class="sr-only">Senha</label>
+          <input
+            type="password"
+            id="password-disable-2fa"
+            v-model="passwordToDisable2Fa"
+            required
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder="Sua Senha"
+          >
+        </div>
+        <p v-if="disable2FaError" class="text-red-500 text-sm mb-4">{{ disable2FaError }}</p>
+        <div class="flex justify-end space-x-4">
+          <button @click="showDisable2FaModal = false; passwordToDisable2Fa = ''; disable2FaError = '';" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
+          <button @click="disable2Fa" :disabled="isLoading2Fa" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">
+            <span v-if="isLoading2Fa">Desabilitando...</span>
+            <span v-else>Confirmar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '../stores/auth';
+
+const authStore = useAuthStore();
+const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8000/api';
+
+const user = ref(null);
+const qrCodeUrl = ref('');
+const google2FaSecret = ref('');
+const errorMessage = ref('');
+const successMessage = ref('');
+const isLoading2Fa = ref(false);
+
+const showDisable2FaModal = ref(false);
+const passwordToDisable2Fa = ref('');
+const disable2FaError = ref('');
+
+onMounted(() => {
+  fetchUserProfile();
+});
+
+const fetchUserProfile = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/user`, {
+      headers: {
+        Authorization: `Bearer ${authStore.authToken}`,
+      },
+    });
+    user.value = response.data.user;
+
+    authStore.user = response.data.user;
+  } catch (error) {
+    console.error('Erro ao buscar perfil do usuário:', error.response?.data || error.message);
+    errorMessage.value = 'Não foi possível carregar as informações do perfil.';
+  }
+};
+
+const enable2Fa = async () => {
+  errorMessage.value = '';
+  successMessage.value = '';
+  isLoading2Fa.value = true;
+  try {
+    const response = await axios.post(`${API_URL}/user/2fa/enable`, {}, {
+      headers: {
+        Authorization: `Bearer ${authStore.authToken}`,
+      },
+    });
+    qrCodeUrl.value = response.data.qr_code_url;
+    google2FaSecret.value = response.data.secret;
+    successMessage.value = 'QR Code gerado com sucesso. Escaneie e salve o segredo!';
+
+    user.value.is_2fa_enabled = true;
+    user.value.google2fa_secret = google2FaSecret.value;
+    authStore.user = { ...authStore.user, is_2fa_enabled: true };
+  } catch (error) {
+    console.error('Erro ao habilitar 2FA:', error.response?.data || error.message);
+    errorMessage.value = 'Erro ao habilitar 2FA. Tente novamente.';
+  } finally {
+    isLoading2Fa.value = false;
+  }
+};
+
+const disable2Fa = async () => {
+  disable2FaError.value = '';
+  successMessage.value = '';
+  isLoading2Fa.value = true;
+  try {
+    await axios.post(`${API_URL}/user/2fa/disable`, { password: passwordToDisable2Fa.value }, {
+      headers: {
+        Authorization: `Bearer ${authStore.authToken}`,
+      },
+    });
+    successMessage.value = '2FA desabilitado com sucesso!';
+    qrCodeUrl.value = '';
+    google2FaSecret.value = '';
+
+    user.value.is_2fa_enabled = false;
+    user.value.google2fa_secret = null;
+    authStore.user = { ...authStore.user, is_2fa_enabled: false, google2fa_secret: null };
+    showDisable2FaModal.value = false;
+    passwordToDisable2Fa.value = '';
+  } catch (error) {
+    console.error('Erro ao desabilitar 2FA:', error.response?.data || error.message);
+    if (error.response && error.response.data && error.response.data.message) {
+      disable2FaError.value = error.response.data.message;
+    } else {
+      disable2FaError.value = 'Erro ao desabilitar 2FA. Senha incorreta ou erro no servidor.';
+    }
+  } finally {
+    isLoading2Fa.value = false;
+  }
+};
+
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Date(dateString).toLocaleDateString('pt-BR', options);
+};
+</script>
+
