@@ -35,8 +35,8 @@ class TaskController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'project_id' => 'required|exists:projects,id', // Garante que o projeto exista
-            'assigned_to' => 'required|exists:users,id',   // Garante que o usuário exista
+            'project_id' => 'required|exists:projects,id',
+            'assigned_to' => 'required|exists:users,id',
             'status' => ['nullable', Rule::in(['pending', 'in_progress', 'completed', 'cancelled'])],
             'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
             'due_date' => 'nullable|date',
@@ -48,8 +48,10 @@ class TaskController extends Controller
             return response()->json(['message' => 'Unauthorized to create task in this project.'], 403);
         }
 
-        $task = Task::create($request->all());
+        $taskData = $request->all();
+        $taskData['created_by'] = Auth::id();
 
+        $task = Task::create($taskData);
 
         return response()->json($task->load('project', 'assignedUser'), 201);
     }
@@ -111,7 +113,8 @@ class TaskController extends Controller
 
         $task->comments()->delete();
         $task->timeLogs()->delete();
-        $task->dependencies()->delete();
+        $task->dependencies()->detach();
+        $task->dependentTasks()->detach();
 
         $task->delete();
 

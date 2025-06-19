@@ -121,11 +121,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore, api } from '../stores/auth';
 
 const authStore = useAuthStore();
-const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8000/api';
 
 const tasks = ref([]);
 const projects = ref([]);
@@ -154,44 +152,34 @@ onMounted(() => {
 
 const fetchTasks = async () => {
   try {
-    const response = await axios.get(`${API_URL}/tasks`, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
-    tasks.value = response.data.map(task => ({
-      ...task,
-      project: projects.value.find(p => p.id === task.project_id),
-      assigned_user: users.value.find(u => u.id === task.assigned_to)
-    }));
+    const response = await api.get('/tasks');
+    tasks.value = response.data;
   } catch (error) {
     console.error('Erro ao buscar tarefas:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
+      authStore.logout();
+    } else {
+      formErrorMessage.value = 'Erro ao buscar tarefas. Tente novamente.';
+    }
   }
 };
 
 const fetchProjects = async () => {
   try {
-    const response = await axios.get(`${API_URL}/projects`, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    const response = await api.get('/projects');
     projects.value = response.data;
   } catch (error) {
-    console.error('Erro ao buscar projetos:', error.response?.data || error.message);
+    console.error('Erro ao buscar projetos para tarefas:', error.response?.data || error.message);
   }
 };
 
 const fetchUsers = async () => {
   try {
-    const response = await axios.get(`${API_URL}/users`, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    const response = await api.get('/users');
     users.value = response.data;
   } catch (error) {
-    console.error('Erro ao buscar usuários:', error.response?.data || error.message);
+    console.error('Erro ao buscar usuários para tarefas:', error.response?.data || error.message);
   }
 };
 
@@ -219,17 +207,9 @@ const saveTask = async () => {
   formErrorMessage.value = '';
   try {
     if (editingTask.value) {
-      await axios.put(`${API_URL}/tasks/${editingTask.value.id}`, currentTask.value, {
-        headers: {
-          Authorization: `Bearer ${authStore.authToken}`,
-        },
-      });
+      await api.put(`/tasks/${editingTask.value.id}`, currentTask.value);
     } else {
-      await axios.post(`${API_URL}/tasks`, currentTask.value, {
-        headers: {
-          Authorization: `Bearer ${authStore.authToken}`,
-        },
-      });
+      await api.post('/tasks', currentTask.value);
     }
     showTaskFormModal.value = false;
     fetchTasks();
@@ -237,6 +217,9 @@ const saveTask = async () => {
     console.error('Erro ao salvar tarefa:', error.response?.data || error.message);
     if (error.response && error.response.data && error.response.data.errors) {
       formErrorMessage.value = Object.values(error.response.data.errors).flat().join(' ');
+    } else if (error.response?.status === 401) {
+      formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
+      authStore.logout();
     } else {
       formErrorMessage.value = 'Erro ao salvar tarefa. Tente novamente.';
     }
@@ -250,15 +233,17 @@ const confirmDeleteTask = (id) => {
 
 const deleteTask = async () => {
   try {
-    await axios.delete(`${API_URL}/tasks/${taskIdToDelete.value}`, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    await api.delete(`/tasks/${taskIdToDelete.value}`);
     showDeleteConfirmModal.value = false;
     fetchTasks();
   } catch (error) {
     console.error('Erro ao excluir tarefa:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
+      authStore.logout();
+    } else {
+      formErrorMessage.value = 'Erro ao excluir tarefa. Tente novamente.';
+    }
   }
 };
 
@@ -272,4 +257,3 @@ const getStatusBadgeClass = (status) => {
   }
 };
 </script>
-
