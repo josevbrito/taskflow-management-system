@@ -136,15 +136,13 @@ Abra o navegador em: `http://localhost:5173`
 - **Email:** user@example.com
 - **Senha:** password
 
-## 📸 Capturas de Ecrã
+## 📸 Algumas Páginas
 
-Adicione imagens aqui:
 
-```
 ![Tela de Login](pages/login.png)
 ![Dashboard](pages/dashboard.png)
 ![Gestão de Projetos](pages/projetos.png)
-```
+
 
 ## 💡 Decisões Técnicas e Desafios
 
