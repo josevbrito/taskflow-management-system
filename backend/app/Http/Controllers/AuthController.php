@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use PragmaRX\Google2FA\Google2FA;
+use PragmaRX\Google2FAQRCode\Google2FA as Google2FAQRCode;
 
 class AuthController extends Controller
 {
@@ -26,13 +27,8 @@ class AuthController extends Controller
             'is_active' => true,
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'message' => 'User registered successfully!',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'message' => 'Usuário registrado com sucesso! Por favor, faça login.'
         ], 201);
     }
 
@@ -55,6 +51,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => '2FA required',
                 'needs_2fa' => true,
+                'user' => $user->only(['id', 'email', 'name'])
             ], 200);
         }
 
@@ -88,6 +85,9 @@ class AuthController extends Controller
         ], 200);
     }
 
+    /**
+     * Habilita 2FA para o usuário autenticado e retorna o QR Code.
+     */
     public function enable2FA(Request $request)
     {
         $user = $request->user();
@@ -95,10 +95,19 @@ class AuthController extends Controller
 
         if (empty($user->google2fa_secret)) {
             $user->google2fa_secret = $google2fa->generateSecretKey();
+            $user->is_2fa_enabled = 1;
             $user->save();
         }
 
-        $qrCodeUrl = $google2fa->getQRCodeUrl(
+        $google2faQrcode = new Google2FAQRCode();
+
+        $otpAuthUrl = $google2fa->getQRCodeUrl(
+            config('app.name'),
+            $user->email,
+            $user->google2fa_secret
+        );
+
+        $qrCodeImageData = $google2faQrcode->getQrCodeInline(
             config('app.name'),
             $user->email,
             $user->google2fa_secret
@@ -106,11 +115,15 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => '2FA secret generated. Scan QR code to activate.',
-            'qr_code_url' => $qrCodeUrl,
+            'qr_code_url' => $qrCodeImageData,
             'secret' => $user->google2fa_secret,
+            'otp_auth_url' => $otpAuthUrl
         ]);
     }
 
+    /**
+     * Desabilita 2FA para o usuário autenticado.
+     */
     public function disable2FA(Request $request)
     {
         $request->validate([
@@ -123,7 +136,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Senha incorreta.'], 401);
         }
 
-        $user->is_2fa_enabled = false;
+        $user->is_2fa_enabled = 0;
         $user->google2fa_secret = null;
         $user->google2fa_verified_at = null;
         $user->save();
@@ -133,6 +146,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Verifica o código 2FA fornecido.
+     */
     public function verify2FA(Request $request)
     {
         $request->validate([
@@ -164,6 +180,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Retorna o usuário autenticado.
+     */
     public function getAuthenticatedUser(Request $request)
     {
         return response()->json(['user' => $request->user()]);
