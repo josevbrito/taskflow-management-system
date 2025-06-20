@@ -1,11 +1,14 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-500 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 space-y-8 transform transition-transform duration-300 hover:scale-105">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-700 via-pink-700 to-indigo-700 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8 animate-fade-in-up">
       <div>
+        <div class="mx-auto h-16 w-16 text-purple-600 flex items-center justify-center rounded-full bg-purple-100 mb-4">
+          <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        </div>
         <h2 class="mt-6 text-center text-4xl font-extrabold tracking-tight text-gray-900">
           Crie sua conta TaskFlow
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-gray-500 text-lg">
           Comece a organizar suas tarefas hoje!
         </p>
       </div>
@@ -20,7 +23,7 @@
               autocomplete="name"
               required
               v-model="name"
-              class="relative block w-full rounded-t-md border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-base sm:leading-6"
+              class="relative block w-full rounded-t-lg border-2 border-gray-200 py-3 px-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-base transition-colors duration-200"
               placeholder="Nome Completo"
             />
           </div>
@@ -33,7 +36,7 @@
               autocomplete="email"
               required
               v-model="email"
-              class="relative block w-full border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-base sm:leading-6"
+              class="relative block w-full border-x-2 border-t-2 border-gray-200 py-3 px-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-base transition-colors duration-200"
               placeholder="Seu Email"
             />
           </div>
@@ -46,7 +49,7 @@
               autocomplete="new-password"
               required
               v-model="password"
-              class="relative block w-full border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-base sm:leading-6"
+              class="relative block w-full border-x-2 border-t-2 border-gray-200 py-3 px-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-base transition-colors duration-200"
               placeholder="Sua Senha"
             />
           </div>
@@ -59,7 +62,7 @@
               autocomplete="new-password"
               required
               v-model="passwordConfirmation"
-              class="relative block w-full rounded-b-md border-0 py-2.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-base sm:leading-6"
+              class="relative block w-full rounded-b-lg border-2 border-gray-200 py-3 px-4 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-base transition-colors duration-200"
               placeholder="Confirme a Senha"
             />
           </div>
@@ -69,7 +72,7 @@
           <button
             type="submit"
             :disabled="isLoading"
-            class="group relative flex w-full justify-center rounded-md bg-indigo-600 px-4 py-3 text-lg font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors duration-200"
+            class="group relative flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-3 text-lg font-semibold text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors duration-200 transform hover:scale-105"
           >
             <span v-if="isLoading" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -85,9 +88,9 @@
         <p v-if="successMessage" class="text-green-600 text-sm text-center font-medium">{{ successMessage }}</p>
       </form>
       <div class="text-center">
-        <p class="text-sm text-gray-600">
+        <p class="text-base text-gray-600 mt-4">
           Já tem uma conta?
-          <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
+          <router-link to="/login" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
             Faça login aqui
           </router-link>
         </p>
@@ -128,7 +131,7 @@ const handleRegister = async () => {
     
     setTimeout(() => {
       router.push('/login');
-    }, 1000); // Redireciona após 1 segundos
+    }, 1000);
   } catch (error) {
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message;
@@ -145,3 +148,19 @@ const handleRegister = async () => {
 };
 </script>
 
+<style>
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+</style>

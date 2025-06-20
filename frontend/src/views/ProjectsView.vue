@@ -2,45 +2,52 @@
   <div class="p-6 bg-white rounded-lg shadow-xl">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Gerenciamento de Projetos</h1>
 
-    <!-- Área de Pesquisa, Filtros e Novo Projeto -->
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
-      <div class="relative w-full sm:w-1/2">
-        <input
-          type="text"
-          v-model="searchQuery"
-          @keyup.enter="fetchProjects"
-          placeholder="Pesquisar projetos..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+      <div class="flex-grow flex items-center gap-2">
+        <div class="relative w-full">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @keyup.enter="fetchProjects"
+            placeholder="Pesquisar projetos..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
         </div>
+        <button
+          @click="fetchProjects"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex-shrink-0"
+          title="Aplicar Pesquisa"
+        >
+          Pesquisar
+        </button>
       </div>
 
-      <!-- Filtro de Status -->
-      <select v-model="statusFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
-        <option value="">Todos os Status</option>
-        <option value="pending">Pendente</option>
-        <option value="in_progress">Em Progresso</option>
-        <option value="completed">Concluído</option>
-        <option value="cancelled">Cancelado</option>
-      </select>
+      <div class="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+        <select v-model="statusFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
+          <option value="">Todos os Status</option>
+          <option value="pendente">Pendente</option>
+          <option value="em_progresso">Em Progresso</option>
+          <option value="completed">Concluído</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
 
-      <!-- Filtro de Prioridade -->
-      <select v-model="priorityFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
-        <option value="">Todas as Prioridades</option>
-        <option value="low">Baixa</option>
-        <option value="medium">Média</option>
-        <option value="high">Alta</option>
-      </select>
+        <select v-model="priorityFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
+          <option value="">Todas as Prioridades</option>
+          <option value="baixa">Baixa</option>
+          <option value="media">Média</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
 
-      <button @click="openProjectForm(null, 'create')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center">
+      <button @click="openProjectForm(null, 'create')" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Novo Projeto
       </button>
     </div>
 
-    <!-- Tabela de Projetos -->
     <div v-if="paginatedProjects.data && paginatedProjects.data.length > 0" class="overflow-x-auto bg-white rounded-lg shadow-md">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -77,11 +84,9 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex justify-end space-x-2">
-                <!-- Botão Visualizar - Visível para todos que podem ver projetos -->
                 <button @click="openProjectForm(project, 'view')" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Visualizar">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
-                <!-- Botão Editar - Visível apenas para Admin/Manager -->
                 <button
                   v-if="authStore.currentUser && (authStore.currentUser.role === 'admin' || authStore.currentUser.role === 'manager')"
                   @click="openProjectForm(project, 'edit')"
@@ -90,7 +95,6 @@
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
-                <!-- Botão Excluir - Visível apenas para Admin/Manager -->
                 <button
                   v-if="authStore.currentUser && (authStore.currentUser.role === 'admin' || authStore.currentUser.role === 'manager')"
                   @click="confirmDeleteProject(project.id)"
@@ -109,7 +113,6 @@
       Nenhum projeto encontrado.
     </div>
 
-    <!-- Paginação -->
     <div v-if="paginatedProjects.last_page > 1" class="flex justify-between items-center mt-6">
       <div class="text-sm text-gray-700">
         Mostrando {{ paginatedProjects.from }} a {{ paginatedProjects.to }} de {{ paginatedProjects.total }} resultados
@@ -143,7 +146,6 @@
     </div>
     <div v-if="formErrorMessage" class="text-red-500 text-sm mt-4 text-center">{{ formErrorMessage }}</div>
 
-    <!-- Componente de Modal de Projeto -->
     <ProjectModal
       v-if="showProjectFormModal"
       :project="currentProject"
@@ -159,7 +161,6 @@
       @fetch-members="fetchProjectMembers"
     />
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
@@ -200,8 +201,8 @@ const currentProject = ref({
   id: null,
   name: '',
   description: '',
-  status: 'pending',
-  priority: 'medium',
+  status: 'pendente',
+  priority: 'media',
   start_date: '',
   end_date: '',
   budget: 0,
@@ -311,8 +312,8 @@ const openProjectForm = (project, mode = 'edit') => {
     currentProject.value = {
       name: '',
       description: '',
-      status: 'pending',
-      priority: 'medium',
+      status: 'pendente',
+      priority: 'media',
       start_date: new Date().toISOString().split('T')[0],
       end_date: '',
       budget: 0,
@@ -368,19 +369,19 @@ const deleteProject = async () => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'pending': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'in_progress': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'completed': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'cancelled': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'em_progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'concluido': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };
 
 const getPriorityBadgeClass = (priority) => {
   switch (priority) {
-    case 'low': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'medium': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'high': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'media': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };

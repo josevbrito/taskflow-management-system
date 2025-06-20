@@ -2,45 +2,52 @@
   <div class="p-6 bg-white rounded-lg shadow-xl">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Gerenciamento de Tarefas</h1>
 
-    <!-- Área de Pesquisa, Filtros e Nova Tarefa -->
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
-      <div class="relative w-full sm:w-1/2">
-        <input
-          type="text"
-          v-model="searchQuery"
-          @keyup.enter="fetchTasks"
-          placeholder="Pesquisar tarefas..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+      <div class="flex-grow flex items-center gap-2">
+        <div class="relative w-full">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @keyup.enter="fetchTasks"
+            placeholder="Pesquisar tarefas..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
         </div>
+        <button
+          @click="fetchTasks"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex-shrink-0"
+          title="Aplicar Pesquisa"
+        >
+          Pesquisar
+        </button>
       </div>
 
-      <!-- Filtro de Status -->
-      <select v-model="statusFilter" @change="fetchTasks" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
-        <option value="">Todos os Status</option>
-        <option value="pending">Pendente</option>
-        <option value="in_progress">Em Progresso</option>
-        <option value="completed">Concluída</option>
-        <option value="cancelled">Cancelada</option>
-      </select>
+      <div class="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+        <select v-model="statusFilter" @change="fetchTasks" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
+          <option value="">Todos os Status</option>
+          <option value="pendente">Pendente</option>
+          <option value="em_progresso">Em Progresso</option>
+          <option value="completed">Concluída</option>
+          <option value="cancelado">Cancelada</option>
+        </select>
 
-      <!-- Filtro de Prioridade -->
-      <select v-model="priorityFilter" @change="fetchTasks" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
-        <option value="">Todas as Prioridades</option>
-        <option value="low">Baixa</option>
-        <option value="medium">Média</option>
-        <option value="high">Alta</option>
-      </select>
+        <select v-model="priorityFilter" @change="fetchTasks" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
+          <option value="">Todas as Prioridades</option>
+          <option value="baixa">Baixa</option>
+          <option value="media">Média</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
 
-      <button @click="openTaskForm(null, 'create')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center">
+      <button @click="openTaskForm(null, 'create')" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Nova Tarefa
       </button>
     </div>
 
-    <!-- Tabela de Tarefas -->
     <div v-if="paginatedTasks.data && paginatedTasks.data.length > 0" class="overflow-x-auto bg-white rounded-lg shadow-md">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -50,7 +57,6 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridade</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Projeto</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Atribuído a</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Criado Por</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Vencimento</th>
             <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
           </tr>
@@ -77,13 +83,9 @@
             <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
               <div class="text-sm text-gray-900">{{ task.assigned_user?.name || 'N/A' }}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-              <div class="text-sm text-gray-900">{{ task.created_by_user?.name || 'N/A' }}</div>
-            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ task.due_date ? new Date(task.due_date).toLocaleDateString() : 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex justify-end space-x-2">
-                <!-- Botão Visualizar -->
                 <button @click="openTaskForm(task, 'view')" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Visualizar">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
@@ -103,7 +105,6 @@
       Nenhuma tarefa encontrada.
     </div>
 
-    <!-- Paginação -->
     <div v-if="paginatedTasks.last_page > 1" class="flex justify-between items-center mt-6">
       <div class="text-sm text-gray-700">
         Mostrando {{ paginatedTasks.from }} a {{ paginatedTasks.to }} de {{ paginatedTasks.total }} resultados
@@ -137,7 +138,6 @@
     </div>
     <div v-if="formErrorMessage" class="text-red-500 text-sm mt-4 text-center">{{ formErrorMessage }}</div>
 
-    <!-- Componente de Modal de Tarefa -->
     <TaskModal
       v-if="showTaskFormModal"
       :task="currentTask"
@@ -154,7 +154,6 @@
       @fetch-comments="fetchTaskComments"
     />
 
-    <!-- Modal de Confirmação de Exclusão da Tarefa -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
@@ -202,8 +201,8 @@ const currentTask = ref({
   description: '',
   project_id: '',
   assigned_to: '',
-  status: 'pending',
-  priority: 'medium',
+  status: 'pendente',
+  priority: 'media',
   due_date: '',
   comments: [],
 });
@@ -328,8 +327,8 @@ const openTaskForm = (task, mode = 'edit') => {
       description: '',
       project_id: projects.value.length > 0 ? projects.value[0].id : '',
       assigned_to: authStore.currentUser?.id || '',
-      status: 'pending',
-      priority: 'medium',
+      status: 'pendente',
+      priority: 'media',
       due_date: '',
     };
   }
@@ -382,19 +381,19 @@ const deleteTask = async () => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'pending': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'in_progress': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'completed': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'cancelled': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'em_progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'concluido': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };
 
 const getPriorityBadgeClass = (priority) => {
   switch (priority) {
-    case 'low': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'medium': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'high': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'media': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };

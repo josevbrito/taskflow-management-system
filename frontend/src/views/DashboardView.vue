@@ -259,10 +259,10 @@ const projectStatusChartData = computed(() => {
   const backgroundColors = data.map((_, index) => {
     const status = labels[index];
     switch(status) {
-      case 'pending': return '#F59E0B';
-      case 'in_progress': return '#3B82F6';
-      case 'completed': return '#10B981';
-      case 'cancelled': return '#EF4444';
+      case 'pendente': return '#F59E0B';
+      case 'em_progresso': return '#3B82F6';
+      case 'concluido': return '#10B981';
+      case 'cancelado': return '#EF4444';
       default: return '#6B7280';
     }
   });
@@ -282,10 +282,10 @@ const taskStatusChartData = computed(() => {
   const backgroundColors = data.map((_, index) => {
     const status = labels[index];
     switch(status) {
-      case 'pending': return '#FCD34D';
-      case 'in_progress': return '#60A5FA';
-      case 'completed': return '#34D399';
-      case 'cancelled': return '#F87171';
+      case 'pendente': return '#FCD34D';
+      case 'em_progresso': return '#60A5FA';
+      case 'concluido': return '#34D399';
+      case 'cancelado': return '#F87171';
       default: return '#9CA3AF';
     }
   });
@@ -305,9 +305,9 @@ const taskPriorityChartData = computed(() => {
   const backgroundColors = data.map((_, index) => {
     const priority = labels[index];
     switch(priority) {
-      case 'low': return '#9CA3AF';
-      case 'medium': return '#60A5FA';
-      case 'high': return '#F87171';
+      case 'baixa': return '#9CA3AF';
+      case 'media': return '#60A5FA';
+      case 'alta': return '#F87171';
       default: return '#6B7280';
     }
   });

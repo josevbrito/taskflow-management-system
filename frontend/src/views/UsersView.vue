@@ -1,23 +1,33 @@
 <template>
   <div class="p-6 bg-white rounded-lg shadow-xl">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Gerenciamento de Utilizadores</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Gerenciamento de Usuários</h1>
 
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
-      <div class="relative w-full sm:w-1/2">
-        <input
-          type="text"
-          v-model="searchQuery"
-          @keyup.enter="fetchUsers"
-          placeholder="Pesquisar utilizadores..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+      <div class="flex-grow flex items-center gap-2">
+        <div class="relative w-full">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @keyup.enter="fetchUsers"
+            placeholder="Pesquisar usuários..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
         </div>
+        <button
+          @click="fetchUsers"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex-shrink-0"
+          title="Aplicar Pesquisa"
+        >
+          Pesquisar
+        </button>
       </div>
-      <button v-if="authStore.currentUser && authStore.currentUser.role === 'admin'" @click="openUserForm(null, 'create')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center">
+      
+      <button v-if="authStore.currentUser && authStore.currentUser.role === 'admin'" @click="openUserForm(null, 'create')" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        Novo Utilizador
+        Novo Usuário
       </button>
     </div>
 
@@ -81,7 +91,7 @@
       </table>
     </div>
     <div v-else class="text-center py-8 text-gray-500">
-      Nenhum utilizador encontrado.
+      Nenhum usuário encontrado.
     </div>
 
     <div v-if="paginatedUsers.last_page > 1" class="flex justify-between items-center mt-6">
@@ -130,9 +140,9 @@
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
-        <p class="text-gray-700 mb-6">Tem certeza de que deseja excluir este utilizador?</p>
+        <p class="text-gray-700 mb-6">Tem certeza de que deseja excluir este usuário?</p>
         <div class="flex justify-end space-x-4">
-          <button @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">Cancelar</button>
+          <button @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
           <button @click="deleteUser" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">Excluir</button>
         </div>
       </div>
@@ -189,14 +199,14 @@ const fetchUsers = async (page = 1) => {
     });
     paginatedUsers.value = response.data;
   } catch (error) {
-    console.error('Erro ao buscar utilizadores:', error.response?.data || error.message);
+    console.error('Erro ao buscar usuários:', error.response?.data || error.message);
     if (error.response?.status === 401) {
       formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
       authStore.logout();
     } else if (error.response?.status === 403) {
-      formErrorMessage.value = 'Você não tem permissão para visualizar utilizadores.';
+      formErrorMessage.value = 'Você não tem permissão para visualizar usuários.';
     } else {
-      formErrorMessage.value = 'Erro ao buscar utilizadores. Tente novamente.';
+      formErrorMessage.value = 'Erro ao buscar usuários. Tente novamente.';
     }
   }
 };
@@ -243,16 +253,16 @@ const saveUser = async (userData) => { // Recebe userData do UserModal
     showUserFormModal.value = false;
     fetchUsers(paginatedUsers.value.current_page);
   } catch (error) {
-    console.error('Erro ao salvar utilizador:', error.response?.data || error.message);
+    console.error('Erro ao salvar usuário:', error.response?.data || error.message);
     if (error.response && error.response.data && error.response.data.errors) {
       formErrorMessage.value = Object.values(error.response.data.errors).flat().join(' ');
     } else if (error.response?.status === 401) {
       formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
       authStore.logout();
     } else if (error.response?.status === 403) {
-      formErrorMessage.value = 'Você não tem permissão para salvar este utilizador.';
+      formErrorMessage.value = 'Você não tem permissão para salvar este usuário.';
     } else {
-      formErrorMessage.value = 'Erro ao salvar utilizador. Tente novamente.';
+      formErrorMessage.value = 'Erro ao salvar usuário. Tente novamente.';
     }
   }
 };
@@ -268,14 +278,14 @@ const deleteUser = async () => {
     showDeleteConfirmModal.value = false;
     fetchUsers(paginatedUsers.value.current_page);
   } catch (error) {
-    console.error('Erro ao excluir utilizador:', error.response?.data || error.message);
+    console.error('Erro ao excluir usuário:', error.response?.data || error.message);
     if (error.response?.status === 401) {
       formErrorMessage.value = 'Sessão expirada ou não autorizado. Faça login novamente.';
       authStore.logout();
     } else if (error.response?.status === 403) {
-      formErrorMessage.value = 'Você não tem permissão para excluir este utilizador.';
+      formErrorMessage.value = 'Você não tem permissão para excluir este usuário.';
     } else {
-      formErrorMessage.value = 'Erro ao excluir utilizador. Tente novamente.';
+      formErrorMessage.value = 'Erro ao excluir usuário. Tente novamente.';
     }
   }
 };

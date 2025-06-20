@@ -2,7 +2,7 @@
   <div class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 opacity-100">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
-        {{ modalMode === 'create' ? 'Criar Novo Utilizador' : (modalMode === 'edit' ? 'Editar Utilizador' : 'Visualizar Utilizador') }}
+        {{ modalMode === 'create' ? 'Criar Novo Usuário' : (modalMode === 'edit' ? 'Editar Usuário' : 'Visualizar Usuário') }}
       </h2>
       <form @submit.prevent="emit('save-user', localUser)">
         <div class="mb-4">
@@ -16,7 +16,7 @@
         <div class="mb-4">
           <label for="user-role" class="block text-gray-700 text-sm font-bold mb-2">Role:</label>
           <select id="user-role" v-model="localUser.role" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <option value="user">Utilizador</option>
+            <option value="user">Usuário</option>
             <option value="manager">Gestor</option>
             <option value="admin">Administrador</option>
           </select>
