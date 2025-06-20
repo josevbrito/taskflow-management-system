@@ -41,7 +41,7 @@ class ProjectPolicy
     {
         // Managers podem ver qualquer projeto.
         // Usuários podem ver projetos que criaram ou dos quais são membros.
-        return $user->id === $project->user_id || $project->members->contains('user_id', $user->id)
+        return $user->isManager() || $user->id === $project->user_id || $project->members->contains('user_id', $user->id)
                     ? Response::allow()
                     : Response::deny('Você não tem permissão para visualizar este projeto.');
     }
@@ -79,10 +79,18 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): Response|bool
     {
-        // Gestores podem excluir qualquer projeto.
-        // Usuários podem excluir projetos que criaram.
         return $user->isManager() || $user->id === $project->user_id
                     ? Response::allow()
                     : Response::deny('Você não tem permissão para excluir este projeto.');
+    }
+
+    /**
+     * Permitido para o criador do projeto, admins e managers.
+     */
+    public function manageMembers(User $user, Project $project): Response|bool
+    {
+        return $user->isManager() || $user->id === $project->user_id
+                    ? Response::allow()
+                    : Response::deny('Você não tem permissão para gerenciar membros deste projeto.');
     }
 }

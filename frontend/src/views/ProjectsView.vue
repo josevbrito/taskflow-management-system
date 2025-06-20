@@ -77,14 +77,26 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex justify-end space-x-2">
-                <!-- Botão Visualizar -->
+                <!-- Botão Visualizar - Visível para todos que podem ver projetos -->
                 <button @click="openProjectForm(project, 'view')" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Visualizar">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
-                <button @click="openProjectForm(project, 'edit')" class="text-indigo-600 hover:text-indigo-800 transition-colors duration-200" title="Editar">
+                <!-- Botão Editar - Visível apenas para Admin/Manager -->
+                <button
+                  v-if="authStore.currentUser && (authStore.currentUser.role === 'admin' || authStore.currentUser.role === 'manager')"
+                  @click="openProjectForm(project, 'edit')"
+                  class="text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+                  title="Editar"
+                >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
-                <button @click="confirmDeleteProject(project.id)" class="text-red-600 hover:text-red-800 transition-colors duration-200" title="Excluir">
+                <!-- Botão Excluir - Visível apenas para Admin/Manager -->
+                <button
+                  v-if="authStore.currentUser && (authStore.currentUser.role === 'admin' || authStore.currentUser.role === 'manager')"
+                  @click="confirmDeleteProject(project.id)"
+                  class="text-red-600 hover:text-red-800 transition-colors duration-200"
+                  title="Excluir"
+                >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
               </div>
@@ -131,61 +143,21 @@
     </div>
     <div v-if="formErrorMessage" class="text-red-500 text-sm mt-4 text-center">{{ formErrorMessage }}</div>
 
-    <!-- Modal para Formulário/Visualização de Projetos -->
-    <div v-if="showProjectFormModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 opacity-100">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
-          {{ modalMode === 'create' ? 'Criar Novo Projeto' : (modalMode === 'edit' ? 'Editar Projeto' : 'Visualizar Projeto') }}
-        </h2>
-        <form @submit.prevent="saveProject">
-          <div class="mb-4">
-            <label for="project-name" class="block text-gray-700 text-sm font-bold mb-2">Nome:</label>
-            <input type="text" id="project-name" v-model="currentProject.name" :readonly="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-          <div class="mb-4">
-            <label for="project-description" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-            <textarea id="project-description" v-model="currentProject.description" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-          </div>
-          <div class="mb-4">
-            <label for="project-status" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
-            <select id="project-status" v-model="currentProject.status" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="pending">Pendente</option>
-              <option value="in_progress">Em Progresso</option>
-              <option value="completed">Concluído</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="project-priority" class="block text-gray-700 text-sm font-bold mb-2">Prioridade:</label>
-            <select id="project-priority" v-model="currentProject.priority" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="low">Baixa</option>
-              <option value="medium">Média</option>
-              <option value="high">Alta</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="project-start-date" class="block text-gray-700 text-sm font-bold mb-2">Data de Início:</label>
-            <input type="date" id="project-start-date" v-model="currentProject.start_date" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-          <div class="mb-4">
-            <label for="project-end-date" class="block text-gray-700 text-sm font-bold mb-2">Data de Fim Estimada:</label>
-            <input type="date" id="project-end-date" v-model="currentProject.end_date" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-          <div class="mb-4">
-            <label for="project-budget" class="block text-gray-700 text-sm font-bold mb-2">Orçamento (R$):</label>
-            <input type="number" id="project-budget" v-model="currentProject.budget" step="0.01" min="0" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-
-          <div v-if="formErrorMessage" class="text-red-500 text-sm mb-4">{{ formErrorMessage }}</div>
-          <div class="flex justify-end space-x-4">
-            <button type="button" @click="showProjectFormModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
-              {{ modalMode === 'view' ? 'Fechar' : 'Cancelar' }}
-            </button>
-            <button v-if="modalMode !== 'view'" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Componente de Modal de Projeto -->
+    <ProjectModal
+      v-if="showProjectFormModal"
+      :project="currentProject"
+      :mode="modalMode"
+      :form-error="formErrorMessage"
+      :member-error="memberError"
+      :all-users="allUsers"
+      :project-members="projectMembers"
+      @close="showProjectFormModal = false"
+      @save-project="saveProject"
+      @add-member="addProjectMember"
+      @remove-member="removeProjectMember"
+      @fetch-members="fetchProjectMembers"
+    />
 
     <!-- Modal de Confirmação de Exclusão -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -193,8 +165,8 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
         <p class="text-gray-700 mb-6">Tem certeza de que deseja excluir este projeto? Todas as tarefas associadas também serão excluídas.</p>
         <div class="flex justify-end space-x-4">
-          <button @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
-          <button @click="deleteProject" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">Excluir</button>
+          <button type="button" @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">Cancelar</button>
+          <button type="button" @click="deleteProject" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">Excluir</button>
         </div>
       </div>
     </div>
@@ -202,9 +174,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { api } from '../stores/auth';
+import ProjectModal from '../components/ProjectModal.vue';
 
 const authStore = useAuthStore();
 
@@ -224,6 +197,7 @@ const showProjectFormModal = ref(false);
 const editingProject = ref(null);
 const modalMode = ref('create');
 const currentProject = ref({
+  id: null,
   name: '',
   description: '',
   status: 'pending',
@@ -231,14 +205,20 @@ const currentProject = ref({
   start_date: '',
   end_date: '',
   budget: 0,
+  members: [],
 });
 const formErrorMessage = ref('');
+const memberError = ref('');
 
 const showDeleteConfirmModal = ref(false);
 const projectIdToDelete = ref(null);
 
+const allUsers = ref([]);
+const projectMembers = ref([]);
+
 onMounted(() => {
   fetchProjects();
+  fetchAllUsers();
 });
 
 const fetchProjects = async (page = 1) => {
@@ -263,6 +243,54 @@ const fetchProjects = async (page = 1) => {
   }
 };
 
+const fetchAllUsers = async () => {
+  try {
+    const response = await api.get('/users', { params: { all: true } });
+    allUsers.value = response.data;
+  } catch (error) {
+    console.error('Erro ao buscar todos os usuários:', error.response?.data || error.message);
+  }
+};
+
+const fetchProjectMembers = async (projectId) => {
+  memberError.value = '';
+  try {
+    const response = await api.get(`/projects/${projectId}/members`);
+    projectMembers.value = response.data;
+  } catch (error) {
+    console.error('Erro ao buscar membros do projeto:', error.response?.data || error.message);
+    memberError.value = 'Erro ao carregar membros do projeto. ' + (error.response?.data?.message || '');
+  }
+};
+
+const addProjectMember = async (projectId, userId, role) => {
+  memberError.value = '';
+  try {
+    const response = await api.post(`/projects/${projectId}/members`, {
+      user_id: userId,
+      role: role,
+    });
+    projectMembers.value.push(response.data);
+  } catch (error) {
+    console.error('Erro ao adicionar membro:', error.response?.data || error.message);
+    memberError.value = 'Erro ao adicionar membro. ' + (error.response?.data?.message || Object.values(error.response?.data?.errors || {}).flat().join(' ') || '');
+  }
+};
+
+const removeProjectMember = async (projectId, userId) => {
+  memberError.value = '';
+  if (!confirm('Tem certeza que deseja remover este membro?')) {
+    return;
+  }
+  try {
+    await api.delete(`/projects/${projectId}/members/${userId}`);
+    projectMembers.value = projectMembers.value.filter(m => m.user_id !== userId);
+  } catch (error) {
+    console.error('Erro ao remover membro:', error.response?.data || error.message);
+    memberError.value = 'Erro ao remover membro. ' + (error.response?.data?.message || '');
+  }
+};
+
 const changePage = (page) => {
   if (page >= 1 && page <= paginatedProjects.value.last_page) {
     fetchProjects(page);
@@ -275,10 +303,9 @@ const openProjectForm = (project, mode = 'edit') => {
 
   if (project) {
     editingProject.value = project;
-    currentProject.value = { ...project,
-      start_date: project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : '',
-      end_date: project.end_date ? new Date(project.end_date).toISOString().split('T')[0] : '',
-    };
+    currentProject.value = JSON.parse(JSON.stringify(project));
+    currentProject.value.start_date = project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : '';
+    currentProject.value.end_date = project.end_date ? new Date(project.end_date).toISOString().split('T')[0] : '';
   } else {
     editingProject.value = null;
     currentProject.value = {
@@ -289,18 +316,19 @@ const openProjectForm = (project, mode = 'edit') => {
       start_date: new Date().toISOString().split('T')[0],
       end_date: '',
       budget: 0,
+      members: [],
     };
   }
   showProjectFormModal.value = true;
 };
 
-const saveProject = async () => {
+const saveProject = async (projectData) => {
   formErrorMessage.value = '';
   try {
     if (editingProject.value) {
-      await api.put(`/projects/${editingProject.value.id}`, currentProject.value);
+      await api.put(`/projects/${projectData.id}`, projectData);
     } else {
-      await api.post('/projects', currentProject.value);
+      await api.post('/projects', projectData);
     }
     showProjectFormModal.value = false;
     fetchProjects(paginatedProjects.value.current_page);
