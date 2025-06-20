@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -28,7 +32,7 @@ class UserController extends Controller
             });
         }
         
-        if ($request->has('all') && $request->all == 'true') {
+        if ($request->has('all') && $request->get('all') == 'true') {
             return response()->json($query->select('id', 'name', 'email', 'role', 'avatar')->get());
         }
 
@@ -50,16 +54,9 @@ class UserController extends Controller
     /**
      * Cria um novo usuário.
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
         $this->authorize('create', User::class);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
-        ]);
 
         $user = User::create([
             'name' => $request->name,
@@ -75,16 +72,10 @@ class UserController extends Controller
     /**
      * Atualiza um usuário existente.
      */
-    public function update(Request $request, User $userModel)
+    public function update(UserUpdateRequest $request, $id)
     {
+        $userModel = User::findOrFail($id);
         $this->authorize('update', $userModel);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userModel->id)],
-            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
 
         $userModel->name = $request->name;
         $userModel->email = $request->email;
@@ -103,8 +94,10 @@ class UserController extends Controller
     /**
      * Exclui um usuário.
      */
-    public function destroy(User $userModel)
+    public function destroy($id)
     {
+        $userModel = User::findOrFail($id);
+
         $this->authorize('delete', $userModel);
 
         $userModel->delete();

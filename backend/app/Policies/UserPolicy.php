@@ -38,9 +38,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): Response|bool
     {
-        // Um usuário pode ver seu próprio perfil.
-        // Administradores podem ver qualquer perfil (já tratado pelo before()).
-        return $user->id === $model->id
+        return $user->id === $model->id || $user->isManager()
                     ? Response::allow()
                     : Response::deny('Você não tem permissão para visualizar este perfil.');
     }
@@ -51,7 +49,6 @@ class UserPolicy
      */
     public function create(User $user): Response|bool
     {
-        // Administradores podem criar usuários (já tratado pelo before()).
         return Response::deny('Você não tem permissão para criar usuários.');
     }
 
@@ -60,10 +57,15 @@ class UserPolicy
      */
     public function update(User $user, User $model): Response|bool
     {
-        // Um usuário pode atualizar seu próprio perfil.
-        return $user->id === $model->id
-                    ? Response::allow()
-                    : Response::deny('Você não tem permissão para atualizar este perfil.');
+        if ($user->id === $model->id) {
+            return Response::allow();
+        }
+
+        if ($user->isManager() && !$model->isAdmin() && !$model->isManager()) {
+            return Response::allow();
+        }
+
+        return Response::deny('Você não tem permissão para atualizar este perfil.');
     }
 
     /**
@@ -72,10 +74,14 @@ class UserPolicy
      */
     public function delete(User $user, User $model): Response|bool
     {
-        // Administradores podem excluir usuários (já tratado pelo before()).
-        // Um usuário não pode excluir a si mesmo.
-        return $user->id !== $model->id
-                    ? Response::allow()
-                    : Response::deny('Você não pode excluir a si mesmo.');
+        if ($user->id === $model->id) {
+            return Response::deny('Você não pode excluir a si mesmo.');
+        }
+
+        if ($user->isManager() && !$model->isAdmin() && !$model->isManager()) {
+            return Response::allow();
+        }
+
+        return Response::deny('Você não tem permissão para excluir este usuário.');
     }
 }

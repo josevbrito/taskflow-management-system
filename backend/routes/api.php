@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskCommentController;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\TaskComment;
 
 // Rotas públicas
 Route::post('/register', [AuthController::class, 'register']);
@@ -60,8 +61,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [UserController::class, 'index'])->middleware('can:viewAny,' . User::class);
         Route::get('/{user}', [UserController::class, 'show'])->middleware('can:view,user');
         Route::post('/', [UserController::class, 'store'])->middleware('can:create,' . User::class);
-        Route::put('/{user}', [UserController::class, 'update'])->middleware('can:update,user');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('can:delete,' . User::class);
+        Route::put('/{user}', [UserController::class, 'update']);
+        Route::delete('/{user}', [UserController::class, 'destroy']);
     });
 
     // Dashboard
