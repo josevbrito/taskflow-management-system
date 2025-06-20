@@ -40,8 +40,8 @@
 
     <!-- User Name and Logout -->
     <div class="flex items-center space-x-4">
-      <span class="text-gray-300 hidden md:inline">Olá, {{ currentUser?.name || 'Utilizador' }}!</span>
-      <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400" :src="currentUser?.avatar || 'https://placehold.co/40x40/cccccc/000000?text=AU'" alt="Avatar do Utilizador" />
+      <span class="text-gray-300 hidden md:inline">Olá, {{ currentUser?.name || 'Usuário' }}!</span>
+      <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400" :src="currentUser?.avatar || 'https://placehold.co/40x40/cccccc/000000?text=AU'" alt="Avatar do Usuário" />
       <button @click="handleLogout" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-md transition-colors duration-200 text-sm">
         <svg class="w-4 h-4 mr-1 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
         Sair

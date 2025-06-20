@@ -72,13 +72,13 @@ router.beforeEach((to, from, next) => {
   const userRole = authStore.currentUser?.role;
 
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    // Se a rota exige autenticação e o utilizador não está logado
+    // Se a rota exige autenticação e o usuário não está logado
     next('/login');
   } else if (to.matched.some(record => record.meta.guest) && loggedIn) {
-    // Se a rota é para convidados (login/registro) e o utilizador já está logado
+    // Se a rota é para convidados (login/registro) e o usuário já está logado
     next('/');
   } else if (to.matched.some(record => record.meta.requiresAdmin) && userRole !== 'admin') {
-    // Se a rota exige role de admin e o utilizador não é admin
+    // Se a rota exige role de admin e o usuário não é admin
     // Redireciona para o dashboard ou uma página de acesso negado
     next('/'); // Ou '/access-denied' se tiver uma página específica
     alert('Acesso negado. Apenas administradores podem acessar esta página.'); // Apenas para feedback rápido
