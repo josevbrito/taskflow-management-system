@@ -6,25 +6,68 @@
       <!-- Informações do Usuário -->
       <div class="bg-gray-50 p-6 rounded-lg shadow-md border border-gray-200">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Informações Pessoais</h2>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Nome:</label>
-          <p class="text-gray-900 text-lg">{{ user.name }}</p>
+
+        <div v-if="!isEditing">
+          <!-- Modo de Visualização -->
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nome:</label>
+            <p class="text-gray-900 text-lg">{{ user.name }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+            <p class="text-gray-900 text-lg">{{ user.email }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Função:</label>
+            <p class="text-gray-900 text-lg capitalize">{{ user.role }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Último Login:</label>
+            <p class="text-gray-900 text-lg">{{ user.last_login_at ? formatDate(user.last_login_at) : 'N/A' }}</p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">IP do Último Login:</label>
+            <p class="text-gray-900 text-lg">{{ user.last_login_ip || 'N/A' }}</p>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button @click="startEditing" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition-colors duration-200">
+              Editar Perfil
+            </button>
+          </div>
         </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-          <p class="text-gray-900 text-lg">{{ user.email }}</p>
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Função:</label>
-          <p class="text-gray-900 text-lg capitalize">{{ user.role }}</p>
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Último Login:</label>
-          <p class="text-gray-900 text-lg">{{ user.last_login_at ? formatDate(user.last_login_at) : 'N/A' }}</p>
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">IP do Último Login:</label>
-          <p class="text-gray-900 text-lg">{{ user.last_login_ip || 'N/A' }}</p>
+
+        <div v-else>
+          <!-- Modo de Edição -->
+          <form @submit.prevent="saveProfile">
+            <div class="mb-4">
+              <label for="edit-name" class="block text-gray-700 text-sm font-bold mb-2">Nome:</label>
+              <input type="text" id="edit-name" v-model="editableUser.name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+              <label for="edit-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+              <input type="email" id="edit-email" v-model="editableUser.email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+              <label for="edit-password" class="block text-gray-700 text-sm font-bold mb-2">Nova Senha (deixe em branco para não alterar):</label>
+              <input type="password" id="edit-password" v-model="editableUser.password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+              <label for="edit-password-confirmation" class="block text-gray-700 text-sm font-bold mb-2">Confirmar Nova Senha:</label>
+              <input type="password" id="edit-password-confirmation" v-model="editableUser.password_confirmation" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <p v-if="editProfileError" class="text-red-500 text-sm mb-4">{{ editProfileError }}</p>
+            <p v-if="editProfileSuccess" class="text-green-500 text-sm mb-4">{{ editProfileSuccess }}</p>
+
+            <div class="flex justify-end space-x-4 mt-6">
+              <button type="button" @click="cancelEditing" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+                Cancelar
+              </button>
+              <button type="submit" :disabled="isSavingProfile" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+                <span v-if="isSavingProfile">Salvando...</span>
+                <span v-else>Salvar Alterações</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -77,8 +120,8 @@
         </div>
         <p v-if="disable2FaError" class="text-red-500 text-sm mb-4">{{ disable2FaError }}</p>
         <div class="flex justify-end space-x-4">
-          <button @click="showDisable2FaModal = false; passwordToDisable2Fa = ''; disable2FaError = '';" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
-          <button @click="disable2Fa" :disabled="isLoading2Fa" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">
+          <button type="button" @click="showDisable2FaModal = false; passwordToDisable2Fa = ''; disable2FaError = '';" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
+          <button type="button" @click="disable2Fa" :disabled="isLoading2Fa" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">
             <span v-if="isLoading2Fa">Desabilitando...</span>
             <span v-else>Confirmar</span>
           </button>
@@ -90,13 +133,22 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore, api } from '../stores/auth';
 
 const authStore = useAuthStore();
-const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8000/api';
 
 const user = ref(null);
+const editableUser = ref({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+});
+const isEditing = ref(false);
+const isSavingProfile = ref(false);
+const editProfileError = ref('');
+const editProfileSuccess = ref('');
+
 const qrCodeUrl = ref('');
 const google2FaSecret = ref('');
 const errorMessage = ref('');
@@ -113,12 +165,10 @@ onMounted(() => {
 
 const fetchUserProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL}/user`, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    const response = await api.get('/user');
     user.value = response.data.user;
+    editableUser.value.name = user.value.name;
+    editableUser.value.email = user.value.email;
 
     authStore.user = response.data.user;
   } catch (error) {
@@ -127,16 +177,65 @@ const fetchUserProfile = async () => {
   }
 };
 
+const startEditing = () => {
+  isEditing.value = true;
+  editProfileError.value = '';
+  editProfileSuccess.value = '';
+  editableUser.value.password = '';
+  editableUser.value.password_confirmation = '';
+};
+
+const cancelEditing = () => {
+  isEditing.value = false;
+  editProfileError.value = '';
+  editProfileSuccess.value = '';
+  editableUser.value.name = user.value.name;
+  editableUser.value.email = user.value.email;
+};
+
+const saveProfile = async () => {
+  editProfileError.value = '';
+  editProfileSuccess.value = '';
+  isSavingProfile.value = true;
+  try {
+    const payload = {
+      name: editableUser.value.name,
+      email: editableUser.value.email,
+    };
+
+    if (editableUser.value.password) {
+      payload.password = editableUser.value.password;
+      payload.password_confirmation = editableUser.value.password_confirmation;
+    }
+
+    const response = await api.put(`/users/${user.value.id}`, payload);
+
+    user.value = response.data;
+    authStore.user = response.data;
+    isEditing.value = false;
+    editProfileSuccess.value = 'Perfil atualizado com sucesso!';
+
+    editableUser.value.password = '';
+    editableUser.value.password_confirmation = '';
+
+  } catch (error) {
+    console.error('Erro ao salvar perfil:', error.response?.data || error.message);
+    if (error.response && error.response.data && error.response.data.errors) {
+      editProfileError.value = Object.values(error.response.data.errors).flat().join(' ');
+    } else {
+      editProfileError.value = 'Erro ao salvar perfil. Tente novamente.';
+    }
+  } finally {
+    isSavingProfile.value = false;
+  }
+};
+
 const enable2Fa = async () => {
   errorMessage.value = '';
   successMessage.value = '';
   isLoading2Fa.value = true;
   try {
-    const response = await axios.post(`${API_URL}/user/2fa/enable`, {}, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    const response = await api.post('/user/2fa/enable');
     qrCodeUrl.value = response.data.qr_code_url;
     google2FaSecret.value = response.data.secret;
     successMessage.value = 'QR Code gerado com sucesso. Escaneie e salve o segredo!';
@@ -157,11 +256,7 @@ const disable2Fa = async () => {
   successMessage.value = '';
   isLoading2Fa.value = true;
   try {
-    await axios.post(`${API_URL}/user/2fa/disable`, { password: passwordToDisable2Fa.value }, {
-      headers: {
-        Authorization: `Bearer ${authStore.authToken}`,
-      },
-    });
+    await api.post('/user/2fa/disable', { password: passwordToDisable2Fa.value });
     successMessage.value = '2FA desabilitado com sucesso!';
     qrCodeUrl.value = '';
     google2FaSecret.value = '';
@@ -188,4 +283,3 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('pt-BR', options);
 };
 </script>
-
