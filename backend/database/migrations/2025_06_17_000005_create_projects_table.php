@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('slug')->unique()->nullable();
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->enum('status', ['Pendente', 'Em Progresso', 'Concluído', 'Cancelado'])->default('Pendente');
+            $table->enum('priority', ['Baixa', 'Média', 'Alta'])->default('Média');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->decimal('budget', 10, 2)->nullable()->default(0.00);

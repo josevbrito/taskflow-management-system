@@ -19,8 +19,8 @@ return new class extends Migration
                 $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
                 $table->foreignId('assigned_to')->constrained('users')->onDelete('cascade');
                 $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
-                $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
-                $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+                $table->enum('status', ['Pendente', 'Em Progresso', 'Concluída', 'Cancelada'])->default('Pendente');
+                $table->enum('priority', ['Baixa', 'Média', 'Alta'])->default('Média');
                 $table->date('due_date')->nullable();
                 $table->timestamp('completed_at')->nullable();
                 $table->timestamps();

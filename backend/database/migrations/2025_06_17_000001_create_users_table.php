@@ -26,13 +26,7 @@ return new class extends Migration
             $table->boolean('is_2fa_enabled')->default(false);
             $table->string('google2fa_secret')->nullable();
             $table->timestamp('google2fa_verified_at')->nullable();
-        
-        // Campos para profile
-            $table->string('avatar')->nullable();
-            $table->text('bio')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('department')->nullable();
-            $table->string('position')->nullable();
+
         
         // Campos para controle de acesso
             $table->timestamp('last_login_at')->nullable();
