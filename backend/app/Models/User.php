@@ -61,22 +61,7 @@ class User extends Authenticatable
 
     public function comments()
     {
-        return $this->hasMany(TaskComment::class, 'user_id');
-    }
-
-    public function timeLogs()
-    {
-        return $this->hasMany(TimeLog::class, 'user_id');
-    }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'user_id');
-    }
-
-    public function fileUploads()
-    {
-        return $this->hasMany(FileUpload::class, 'user_id');
+        return $this->hasMany(TaskComment::class);
     }
 
     public function projectMemberships()
