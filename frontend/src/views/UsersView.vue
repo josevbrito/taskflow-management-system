@@ -46,7 +46,11 @@
           <tr v-for="user in paginatedUsers.data" :key="user.id">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
-                <img class="h-8 w-8 rounded-full mr-2 object-cover" :src="user.avatar || 'https://placehold.co/32x32/cccccc/000000?text=AU'" alt="Avatar">
+                <!-- Avatar do Usuário ou Ícone SVG Padrão -->
+                <img v-if="user.avatar" class="h-8 w-8 rounded-full mr-2 object-cover" :src="user.avatar" alt="Avatar">
+                <div v-else class="h-8 w-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center mr-2">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
                 <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
               </div>
             </td>

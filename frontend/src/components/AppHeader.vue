@@ -33,10 +33,15 @@
       </nav>
     </div>
 
+
     <div class="flex items-center space-x-4">
       <router-link to="/profile" class="flex items-center space-x-2 cursor-pointer group p-1 -m-1 rounded-full hover:bg-gray-700 transition-colors duration-200">
         <span class="text-gray-300 hidden md:inline group-hover:text-white transition-colors duration-200 text-base">Olá, {{ currentUser?.name || 'Usuário' }}!</span>
-        <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400 group-hover:border-white transition-colors duration-200" :src="currentUser?.avatar || 'https://placehold.co/40x40/cccccc/000000?text=AU'" alt="Avatar do Usuário" />
+        
+        <img v-if="currentUser?.avatar" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400 group-hover:border-white transition-colors duration-200" :src="currentUser.avatar" alt="Avatar do Usuário" />
+        <div v-else class="h-10 w-10 rounded-full bg-gray-700 text-white flex items-center justify-center border-2 border-indigo-400 group-hover:border-white transition-colors duration-200">
+          <svg class="h-6 w-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        </div>
       </router-link>
       <button @click="handleLogout" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-md transition-colors duration-200 text-sm">
         <svg class="w-4 h-4 mr-1 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -60,28 +65,12 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-/* Adicionando alguns estilos para o router-link-active */
 .router-link-active {
   color: white;
   font-weight: 600;
-  background-color: theme('colors.gray.700'); /* Um fundo para o link ativo */
+  background-color: theme('colors.gray.700');
 }
 .router-link-active svg {
   color: theme('colors.indigo.200');
 }
-
-/* Opcional: Efeito sublinhado animado */
-/*
-.router-link-exact-active::after {
-  content: '';
-  display: block;
-  width: 0%;
-  height: 2px;
-  background: theme('colors.indigo.400');
-  transition: width 0.3s ease-in-out;
-}
-.router-link-exact-active:hover::after {
-  width: 100%;
-}
-*/
 </style>
