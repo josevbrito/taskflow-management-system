@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Models\User;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Policies\UserPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\TaskPolicy;
+use App\Policies\TaskCommentPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -22,6 +24,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Project::class => ProjectPolicy::class,
         Task::class => TaskPolicy::class,
+        TaskComment::class => TaskCommentPolicy::class,
     ];
 
     /**
