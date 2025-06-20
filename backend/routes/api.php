@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskCommentController;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -46,6 +47,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{task}', [TaskController::class, 'show'])->middleware('can:view,task');
         Route::put('/{task}', [TaskController::class, 'update'])->middleware('can:update,task');
         Route::delete('/{task}', [TaskController::class, 'destroy'])->middleware('can:delete,task');
+
+        // Rotas de Comentários de Tarefas
+        Route::get('/{task}/comments', [TaskCommentController::class, 'index'])->middleware('can:view,task'); // Quem pode ver a tarefa, pode ver comentários
+        Route::post('/{task}/comments', [TaskCommentController::class, 'store'])->middleware('can:createComment,task'); // Nova política para criar comentário
+        Route::put('/{task}/comments/{comment}', [TaskCommentController::class, 'update'])->middleware('can:update,comment');
+        Route::delete('/{task}/comments/{comment}', [TaskCommentController::class, 'destroy'])->middleware('can:delete,comment');
     });
 
     // Rotas para Users
@@ -54,10 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{user}', [UserController::class, 'show'])->middleware('can:view,user');
         Route::post('/', [UserController::class, 'store'])->middleware('can:create,' . User::class);
         Route::put('/{user}', [UserController::class, 'update'])->middleware('can:update,user');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('can:delete,user');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('can:delete,' . User::class);
     });
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
-
 });

@@ -40,7 +40,7 @@ class TaskPolicy
     {
         // Managers podem ver qualquer tarefa.
         // Usuários podem ver tarefas que lhes foram atribuídas ou que criaram, ou tarefas em projetos que eles criaram/são membros.
-        return $user->id === $task->assigned_to || $user->id === $task->created_by ||
+        return $user->isManager() || $user->id === $task->assigned_to || $user->id === $task->created_by ||
                $user->id === $task->project->user_id || $task->project->members->contains('user_id', $user->id)
                     ? Response::allow()
                     : Response::deny('Você não tem permissão para visualizar esta tarefa.');
@@ -84,5 +84,13 @@ class TaskPolicy
         return $user->isManager() || $user->id === $task->created_by
                     ? Response::allow()
                     : Response::deny('Você não tem permissão para excluir esta tarefa.');
+    }
+
+    /**
+     * Determina se o usuário autenticado pode criar comentários numa determinada tarefa.
+     */
+    public function createComment(User $user, Task $task): Response|bool
+    {
+        return $this->view($user, $task);
     }
 }

@@ -13,7 +13,7 @@
           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         />
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
       </div>
 
@@ -78,7 +78,7 @@
               <div class="text-sm text-gray-900">{{ task.assigned_user?.name || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-              <div class="text-sm text-gray-900">{{ task.created_by_user?.name || 'N/A' }}</div> <!-- Usar created_by_user -->
+              <div class="text-sm text-gray-900">{{ task.created_by_user?.name || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ task.due_date ? new Date(task.due_date).toLocaleDateString() : 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -137,68 +137,24 @@
     </div>
     <div v-if="formErrorMessage" class="text-red-500 text-sm mt-4 text-center">{{ formErrorMessage }}</div>
 
-    <!-- Modal para Formulário/Visualização de Tarefas -->
-    <div v-if="showTaskFormModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 opacity-100">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
-          {{ modalMode === 'create' ? 'Criar Nova Tarefa' : (modalMode === 'edit' ? 'Editar Tarefa' : 'Visualizar Tarefa') }}
-        </h2>
-        <form @submit.prevent="saveTask">
-          <div class="mb-4">
-            <label for="task-title" class="block text-gray-700 text-sm font-bold mb-2">Título:</label>
-            <input type="text" id="task-title" v-model="currentTask.title" :readonly="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-          <div class="mb-4">
-            <label for="task-description" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-            <textarea id="task-description" v-model="currentTask.description" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-          </div>
-          <div class="mb-4">
-            <label for="task-project" class="block text-gray-700 text-sm font-bold mb-2">Projeto:</label>
-            <select id="task-project" v-model="currentTask.project_id" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="">Selecione um projeto</option>
-              <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="task-assigned-to" class="block text-gray-700 text-sm font-bold mb-2">Atribuir a:</label>
-            <select id="task-assigned-to" v-model="currentTask.assigned_to" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="">Selecione um usuário</option>
-              <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="task-status" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
-            <select id="task-status" v-model="currentTask.status" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="pending">Pendente</option>
-              <option value="in_progress">Em Progresso</option>
-              <option value="completed">Concluída</option>
-              <option value="cancelled">Cancelada</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="task-priority" class="block text-gray-700 text-sm font-bold mb-2">Prioridade:</label>
-            <select id="task-priority" v-model="currentTask.priority" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-              <option value="low">Baixa</option>
-              <option value="medium">Média</option>
-              <option value="high">Alta</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label for="task-due-date" class="block text-gray-700 text-sm font-bold mb-2">Data de Vencimento:</label>
-            <input type="date" id="task-due-date" v-model="currentTask.due_date" :readonly="modalMode === 'view'" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          </div>
-          <div v-if="formErrorMessage" class="text-red-500 text-sm mb-4">{{ formErrorMessage }}</div>
-          <div class="flex justify-end space-x-4">
-            <button type="button" @click="showTaskFormModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
-              {{ modalMode === 'view' ? 'Fechar' : 'Cancelar' }}
-            </button>
-            <button v-if="modalMode !== 'view'" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200">Salvar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Componente de Modal de Tarefa -->
+    <TaskModal
+      v-if="showTaskFormModal"
+      :task="currentTask"
+      :mode="modalMode"
+      :form-error="formErrorMessage"
+      :comment-error="commentError"
+      :projects="projects"
+      :users="users"
+      :task-comments="taskComments"
+      @close="showTaskFormModal = false"
+      @save-task="saveTask"
+      @add-comment="addComment"
+      @delete-comment="confirmDeleteComment"
+      @fetch-comments="fetchTaskComments"
+    />
 
-    <!-- Modal de Confirmação de Exclusão -->
+    <!-- Modal de Confirmação de Exclusão da Tarefa -->
     <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-sm">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
@@ -216,6 +172,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { api } from '../stores/auth';
+import TaskModal from '../components/TaskModal.vue';
 
 const authStore = useAuthStore();
 
@@ -237,7 +194,10 @@ const users = ref([]);
 const showTaskFormModal = ref(false);
 const editingTask = ref(null);
 const modalMode = ref('create');
+const modalSubTab = ref('details');
+
 const currentTask = ref({
+  id: null,
   title: '',
   description: '',
   project_id: '',
@@ -245,11 +205,16 @@ const currentTask = ref({
   status: 'pending',
   priority: 'medium',
   due_date: '',
+  comments: [],
 });
 const formErrorMessage = ref('');
+const commentError = ref('');
+const newCommentContent = ref('');
 
 const showDeleteConfirmModal = ref(false);
 const taskIdToDelete = ref(null);
+
+const taskComments = ref([]);
 
 onMounted(() => {
   fetchTasks();
@@ -281,7 +246,6 @@ const fetchTasks = async (page = 1) => {
 
 const fetchProjects = async () => {
   try {
-    // Buscar todos os projetos, não paginados, para o dropdown
     const response = await api.get('/projects', { params: { all: true } });
     projects.value = response.data.data ? response.data.data : response.data;
   } catch (error) {
@@ -291,13 +255,56 @@ const fetchProjects = async () => {
 
 const fetchUsers = async () => {
   try {
-    // Buscar todos os usuários, não paginados, para o dropdown
     const response = await api.get('/users', { params: { all: true } });
     users.value = response.data.data ? response.data.data : response.data;
   } catch (error) {
     console.error('Erro ao buscar usuários para tarefas:', error.response?.data || error.message);
   }
 };
+
+const fetchTaskComments = async (taskId) => {
+  commentError.value = '';
+  try {
+    const response = await api.get(`/tasks/${taskId}/comments`);
+    taskComments.value = response.data;
+  } catch (error) {
+    console.error('Erro ao buscar comentários da tarefa:', error.response?.data || error.message);
+    commentError.value = 'Erro ao carregar comentários. ' + (error.response?.data?.message || '');
+  }
+};
+
+const addComment = async (taskId, content) => {
+  commentError.value = '';
+  if (!content.trim()) {
+    commentError.value = 'O comentário não pode estar vazio.';
+    return;
+  }
+  try {
+    const response = await api.post(`/tasks/${taskId}/comments`, {
+      content: content,
+    });
+    taskComments.value.push(response.data);
+    // newCommentContent.value = '';
+  } catch (error) {
+    console.error('Erro ao adicionar comentário:', error.response?.data || error.message);
+    commentError.value = 'Erro ao adicionar comentário. ' + (error.response?.data?.message || Object.values(error.response?.data?.errors || {}).flat().join(' ') || '');
+  }
+};
+
+const confirmDeleteComment = async (taskId, commentId) => {
+  commentError.value = '';
+  if (!confirm('Tem certeza que deseja excluir este comentário?')) {
+    return;
+  }
+  try {
+    await api.delete(`/tasks/${taskId}/comments/${commentId}`);
+    taskComments.value = taskComments.value.filter(c => c.id !== commentId);
+  } catch (error) {
+    console.error('Erro ao excluir comentário:', error.response?.data || error.message);
+    commentError.value = 'Erro ao excluir comentário. ' + (error.response?.data?.message || '');
+  }
+};
+
 
 const changePage = (page) => {
   if (page >= 1 && page <= paginatedTasks.value.last_page) {
@@ -308,10 +315,12 @@ const changePage = (page) => {
 const openTaskForm = (task, mode = 'edit') => {
   formErrorMessage.value = '';
   modalMode.value = mode;
+  modalSubTab.value = 'details';
 
   if (task) {
     editingTask.value = task;
-    currentTask.value = { ...task, due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '' };
+    currentTask.value = JSON.parse(JSON.stringify(task));
+    currentTask.value.due_date = task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '';
   } else {
     editingTask.value = null;
     currentTask.value = {
@@ -327,13 +336,13 @@ const openTaskForm = (task, mode = 'edit') => {
   showTaskFormModal.value = true;
 };
 
-const saveTask = async () => {
+const saveTask = async (taskData) => {
   formErrorMessage.value = '';
   try {
     if (editingTask.value) {
-      await api.put(`/tasks/${editingTask.value.id}`, currentTask.value);
+      await api.put(`/tasks/${taskData.id}`, taskData);
     } else {
-      await api.post('/tasks', currentTask.value);
+      await api.post('/tasks', taskData);
     }
     showTaskFormModal.value = false;
     fetchTasks(paginatedTasks.value.current_page);
