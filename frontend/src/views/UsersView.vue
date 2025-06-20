@@ -67,7 +67,7 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </button>
                 <button
-                  v-if="authStore.currentUser && authStore.currentUser.role === 'admin'"
+                  v-if="authStore.currentUser && authStore.currentUser.role === 'admin' && user.id !== authStore.currentUser.id"
                   @click="confirmDeleteUser(user.id)"
                   class="text-red-600 hover:text-red-800 transition-colors duration-200"
                   title="Excluir"
@@ -132,7 +132,7 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">Confirmar Exclusão</h2>
         <p class="text-gray-700 mb-6">Tem certeza de que deseja excluir este utilizador?</p>
         <div class="flex justify-end space-x-4">
-          <button @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md">Cancelar</button>
+          <button @click="showDeleteConfirmModal = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors duration-200">Cancelar</button>
           <button @click="deleteUser" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md">Excluir</button>
         </div>
       </div>
@@ -144,7 +144,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { api } from '../stores/auth';
-import UserModal from '../components/UserModal.vue'; // Importa o novo componente UserModal
+import UserModal from '../components/UserModal.vue';
 
 const authStore = useAuthStore();
 
