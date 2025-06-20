@@ -6,6 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -20,6 +24,7 @@ class UserController extends Controller
 
         $query = User::query();
 
+        // Aplicar filtro de pesquisa (por nome ou email)
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -50,16 +55,9 @@ class UserController extends Controller
     /**
      * Cria um novo usuário.
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
         $this->authorize('create', User::class);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
-        ]);
 
         $user = User::create([
             'name' => $request->name,
@@ -75,16 +73,9 @@ class UserController extends Controller
     /**
      * Atualiza um usuário existente.
      */
-    public function update(Request $request, User $userModel)
+    public function update(UserUpdateRequest $request, User $userModel)
     {
         $this->authorize('update', $userModel);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userModel->id)],
-            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
 
         $userModel->name = $request->name;
         $userModel->email = $request->email;
