@@ -21,7 +21,16 @@ class UserSeeder extends Seeder
             'is_active' => true,
             'is_2fa_enabled' => false,
         ]);
-
+        
+        User::factory()->create([
+            'name' => 'Manager User',
+            'email' => 'manager@example.com',
+            'password' => Hash::make('password'),
+            'role' => 'manager',
+            'is_active' => true,
+            'is_2fa_enabled' => false,
+        ]);
+        
         User::factory()->create([
             'name' => 'Regular User',
             'email' => 'user@example.com',
