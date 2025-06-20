@@ -5,13 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(User::class, 'user');
-    }
+    use AuthorizesRequests;
+
 
     /**
      * Retorna uma lista de todos os usuários.
@@ -38,5 +37,4 @@ class UserController extends Controller
     {
         return response()->json($user);
     }
-
 }

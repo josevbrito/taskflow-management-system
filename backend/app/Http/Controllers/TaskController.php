@@ -8,14 +8,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TaskController extends Controller
 {
-    public function __construct()
-    {
-        // Aplica a TaskPolicy para autorizar automaticamente os métodos CRUD
-        $this->authorizeResource(Task::class, 'task');
-    }
+    use AuthorizesRequests;
 
     /**
      * Retorna uma lista de tarefas do usuário autenticado ou de projetos que ele participa.

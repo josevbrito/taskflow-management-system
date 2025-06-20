@@ -6,14 +6,12 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProjectController extends Controller
 {
-    public function __construct()
-    {
-        // Aplica a ProjectPolicy para autorizar automaticamente os métodos CRUD
-        $this->authorizeResource(Project::class, 'project');
-    }
+    use AuthorizesRequests;
+
 
     /**
      * Retorna uma lista de projetos.
