@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
 
     /**
      * Retorna uma lista de todos os usuários.
@@ -23,10 +27,6 @@ class UserController extends Controller
      */
     public function adminIndex()
     {
-        // Verifica se o usuário autenticado é um administrador
-        if (!Auth::user()->isAdmin()) {
-            return response()->json(['message' => 'Forbidden: You do not have administrator access.'], 403);
-        }
         $users = User::all();
         return response()->json($users);
     }
@@ -36,10 +36,6 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        // Permite que um usuário veja seu próprio perfil ou que um admin veja qualquer perfil
-        if (Auth::id() !== $user->id && !Auth::user()->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized to view this user profile.'], 403);
-        }
         return response()->json($user);
     }
 
