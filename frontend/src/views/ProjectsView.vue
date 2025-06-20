@@ -28,17 +28,17 @@
       <div class="flex flex-col sm:flex-row gap-4 flex-shrink-0">
         <select v-model="statusFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
           <option value="">Todos os Status</option>
-          <option value="pendente">Pendente</option>
-          <option value="em_progresso">Em Progresso</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Em Progresso">Em Progresso</option>
           <option value="completed">Concluído</option>
-          <option value="cancelado">Cancelado</option>
+          <option value="Cancelado">Cancelado</option>
         </select>
 
         <select v-model="priorityFilter" @change="fetchProjects" class="w-full sm:w-auto border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2 px-3 text-gray-700">
           <option value="">Todas as Prioridades</option>
-          <option value="baixa">Baixa</option>
-          <option value="media">Média</option>
-          <option value="alta">Alta</option>
+          <option value="Baixa">Baixa</option>
+          <option value="Média">Média</option>
+          <option value="Alta">Alta</option>
         </select>
       </div>
 
@@ -201,8 +201,8 @@ const currentProject = ref({
   id: null,
   name: '',
   description: '',
-  status: 'pendente',
-  priority: 'media',
+  status: 'Pendente',
+  priority: 'Média',
   start_date: '',
   end_date: '',
   budget: 0,
@@ -312,8 +312,8 @@ const openProjectForm = (project, mode = 'edit') => {
     currentProject.value = {
       name: '',
       description: '',
-      status: 'pendente',
-      priority: 'media',
+      status: 'Pendente',
+      priority: 'Média',
       start_date: new Date().toISOString().split('T')[0],
       end_date: '',
       budget: 0,
@@ -369,19 +369,19 @@ const deleteProject = async () => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'em_progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'concluido': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Em Progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Concluído': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };
 
 const getPriorityBadgeClass = (priority) => {
   switch (priority) {
-    case 'baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'media': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Média': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };

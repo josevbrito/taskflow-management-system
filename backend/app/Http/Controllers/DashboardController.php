@@ -21,13 +21,13 @@ class DashboardController extends Controller
 
         // 1. Estatísticas Gerais
         $totalProjects = $user->projects()->count();
-        $completedProjects = $user->projects()->where('status', 'completed')->count();
+        $completedProjects = $user->projects()->where('status', 'Concluído')->count();
         $totalTasks = $user->assignedTasks()->count();
-        $completedTasks = $user->assignedTasks()->where('status', 'completed')->count();
-        $pendingTasks = $user->assignedTasks()->where('status', 'pending')->count();
-        $inProgressTasks = $user->assignedTasks()->where('status', 'in_progress')->count();
+        $completedTasks = $user->assignedTasks()->where('status', 'Concluída')->count();
+        $pendingTasks = $user->assignedTasks()->where('status', 'Pendente')->count();
+        $inProgressTasks = $user->assignedTasks()->where('status', 'Em Progresso')->count();
         $overdueTasks = Task::where('due_date', '<', now())
-                            ->whereIn('status', ['pending', 'in_progress']);
+                            ->whereIn('status', ['Pendente', 'Em Progresso']);
 
         if ($user->isUser()) {
             $overdueTasks->where(function ($q) use ($user) {
@@ -105,7 +105,7 @@ class DashboardController extends Controller
         $userTaskRanking = $userTaskRankingQuery->get();
 
         // 6. Últimas Tarefas Ativas (para "Atividades Recentes")
-        $recentTasksQuery = Task::whereIn('status', ['pending', 'in_progress'])
+        $recentTasksQuery = Task::whereIn('status', ['Pendente', 'Em Progresso'])
             ->orderBy('updated_at', 'desc')
             ->limit(5);
 

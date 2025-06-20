@@ -75,8 +75,8 @@ class ProjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => ['nullable', Rule::in(['pending', 'in_progress', 'completed', 'cancelled'])],
-            'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
+            'status' => ['nullable', Rule::in(['Pendente', 'Em Progresso', 'Concluído', 'Cancelado'])],
+            'priority' => ['nullable', Rule::in(['Baixa', 'Média', 'Alta'])],
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'budget' => 'nullable|numeric|min:0',
@@ -115,8 +115,8 @@ class ProjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => ['nullable', Rule::in(['pending', 'in_progress', 'completed', 'cancelled'])],
-            'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
+            'status' => ['nullable', Rule::in(['Pendente', 'Em Progresso', 'Concluído', 'Cancelado'])],
+            'priority' => ['nullable', Rule::in(['Baixa', 'Média', 'Alta'])],
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'budget' => 'nullable|numeric|min:0',

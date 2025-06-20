@@ -38,18 +38,18 @@
         <div class="mb-4">
           <label for="project-status" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
           <select id="project-status" v-model="localProject.status" :disabled="mode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <option value="pendente">Pendente</option>
-            <option value="em_progresso">Em Progresso</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Em Progresso">Em Progresso</option>
             <option value="completed">Concluído</option>
-            <option value="cancelado">Cancelado</option>
+            <option value="Cancelado">Cancelado</option>
           </select>
         </div>
         <div class="mb-4">
           <label for="project-priority" class="block text-gray-700 text-sm font-bold mb-2">Prioridade:</label>
           <select id="project-priority" v-model="localProject.priority" :disabled="mode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <option value="baixa">Baixa</option>
-            <option value="media">Média</option>
-            <option value="alta">Alta</option>
+            <option value="Baixa">Baixa</option>
+            <option value="Média">Média</option>
+            <option value="Alta">Alta</option>
           </select>
         </div>
         <div class="mb-4">
@@ -195,19 +195,19 @@ const availableUsersToAdd = computed(() => {
 
 const getStatusBadgeClass = (status) => {
   switch (status) {
-    case 'pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'em_progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'concluido': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Pendente': return 'bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Em Progresso': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Concluído': return 'bg-green-200 text-green-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Cancelado': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };
 
 const getPriorityBadgeClass = (priority) => {
   switch (priority) {
-    case 'baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'media': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
-    case 'alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Baixa': return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Média': return 'bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold';
+    case 'Alta': return 'bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-semibold';
     default: return 'bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold';
   }
 };

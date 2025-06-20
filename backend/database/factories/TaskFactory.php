@@ -34,8 +34,8 @@ class TaskFactory extends Factory
             'project_id' => $projectId,
             'assigned_to' => $assignedToUserId,
             'created_by' => $createdByUserId,
-            'status' => $this->faker->randomElement(['pending', 'in_progress', 'completed', 'cancelled']),
-            'priority' => $this->faker->randomElement(['low', 'medium', 'high']),
+            'status' => $this->faker->randomElement(['Pendente', 'Em Progresso', 'Concluída', 'Cancelada']),
+            'priority' => $this->faker->randomElement(['Baixa', 'Média', 'Alta']),
             'due_date' => $this->faker->dateTimeBetween('now', '+1 year')->format('Y-m-d'),
             'completed_at' => $this->faker->boolean(20) ? $this->faker->dateTimeBetween('-1 year', 'now') : null, // 20% de chance de ser concluída
         ];

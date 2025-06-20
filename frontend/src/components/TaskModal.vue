@@ -50,18 +50,18 @@
         <div class="mb-4">
           <label for="task-status" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
           <select id="task-status" v-model="localTask.status" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <option value="pendente">Pendente</option>
-            <option value="em_progresso">Em Progresso</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Em Progresso">Em Progresso</option>
             <option value="completed">Concluída</option>
-            <option value="cancelado">Cancelada</option>
+            <option value="Cancelado">Cancelada</option>
           </select>
         </div>
         <div class="mb-4">
           <label for="task-priority" class="block text-gray-700 text-sm font-bold mb-2">Prioridade:</label>
           <select id="task-priority" v-model="localTask.priority" :disabled="modalMode === 'view'" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <option value="baixa">Baixa</option>
-            <option value="media">Média</option>
-            <option value="alta">Alta</option>
+            <option value="Baixa">Baixa</option>
+            <option value="Média">Média</option>
+            <option value="Alta">Alta</option>
           </select>
         </div>
         <div class="mb-4">

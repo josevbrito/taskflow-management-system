@@ -76,8 +76,8 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'project_id' => 'required|exists:projects,id',
             'assigned_to' => 'required|exists:users,id',
-            'status' => ['nullable', Rule::in(['pending', 'in_progress', 'completed', 'cancelled'])],
-            'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
+            'status' => ['nullable', Rule::in(['Pendente', 'Em Progresso', 'Concluída', 'Cancelada'])],
+            'priority' => ['nullable', Rule::in(['Baixa', 'Média', 'Alta'])],
             'due_date' => 'nullable|date',
         ]);
 
@@ -118,8 +118,8 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'project_id' => 'required|exists:projects,id',
             'assigned_to' => 'required|exists:users,id',
-            'status' => ['nullable', Rule::in(['pending', 'in_progress', 'completed', 'cancelled'])],
-            'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
+            'status' => ['nullable', Rule::in(['Pendente', 'Em Progresso', 'Concluída', 'Cancelada'])],
+            'priority' => ['nullable', Rule::in(['Baixa', 'Média', 'Alta'])],
             'due_date' => 'nullable|date',
         ]);
 
