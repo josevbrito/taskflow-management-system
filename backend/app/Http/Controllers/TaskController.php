@@ -103,7 +103,7 @@ class TaskController extends Controller
     {
         $this->authorize('view', $task);
 
-        return response()->json($task->load('project', 'assignedUser', 'createdBy', 'comments.user', 'timeLogs.user', 'dependencies', 'dependentTasks', 'fileUploads'));
+        return response()->json($task->load('project', 'assignedUser', 'createdBy', 'comments.user'));
     }
 
     /**
@@ -130,7 +130,8 @@ class TaskController extends Controller
             return response()->json(['message' => 'Unauthorized: You do not have access to the target project.'], 403);
         }
 
-        $task->update($request->all());
+        $data = $request->except('created_by');
+        $task->update($data);
 
         return response()->json($task->load('project', 'assignedUser', 'createdBy'));
     }
@@ -140,12 +141,9 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $this->authorize('delete', $task); // Aplica a política delete
+        $this->authorize('delete', $task);
 
         $task->comments()->delete();
-        $task->timeLogs()->delete();
-        $task->dependencies()->detach();
-        $task->dependentTasks()->detach();
 
         $task->delete();
 
