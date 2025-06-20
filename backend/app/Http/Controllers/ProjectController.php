@@ -14,23 +14,38 @@ class ProjectController extends Controller
 
 
     /**
-     * Retorna uma lista de projetos.
+     * Retorna uma lista de projetos paginada e com filtro de pesquisa.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $this->authorize('viewAny', Project::class);
+
         $user = Auth::user();
-        // Verifica o papel do usuário e retorna os projetos adequados
-        if ($user->isUser()) {
-            $projects = Project::where('user_id', $user->id)
-                            ->orWhereHas('members', function ($query) use ($user) {
-                                $query->where('user_id', $user->id);
-                            })
-                            ->with('user', 'members.user')
-                            ->get();
-        } else {
-            // Admin e Manager podem ver todos os projetos
-            $projects = Project::with('user', 'members.user')->get();
+        $query = Project::query();
+
+        // Aplica filtro de pesquisa
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            });
         }
+
+        // Aplica filtro de usuário (se não for admin/manager)
+        if ($user->isUser()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('members', function ($memberQuery) use ($user) {
+                      $memberQuery->where('user_id', $user->id);
+                  });
+            });
+        }
+
+        // Retorna os resultados paginados (5 itens por página) e carrega os relacionamentos
+        $projects = $query->with('user', 'members.user')
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(5);
 
         return response()->json($projects);
     }
@@ -40,6 +55,8 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Project::class);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -52,7 +69,6 @@ class ProjectController extends Controller
 
         $project = Auth::user()->projects()->create($request->all());
 
-        // Adiciona o criador como membro do projeto por padrão
         $project->members()->create([
             'user_id' => Auth::id(),
             'role' => 'owner',
@@ -66,6 +82,8 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        $this->authorize('view', $project);
+
         return response()->json($project->load('user', 'tasks', 'members.user'));
     }
 
@@ -74,6 +92,8 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -94,6 +114,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        $this->authorize('delete', $project);
+
         $project->tasks()->delete();
         $project->members()->delete();
 
