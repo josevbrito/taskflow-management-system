@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// import { createWebHashHistory } from 'vue-router'; // GITHUB PAGES
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import DashboardView from '../views/DashboardView.vue';
 import TasksView from '../views/TasksView.vue';
 import ProjectsView from '../views/ProjectsView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import AdminPanelView from '../views/AdminPanelView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
+import { useAuthStore } from '../stores/auth';
 
 const routes = [
   {
@@ -46,6 +47,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/admin-panel',
+    name: 'admin-panel',
+    component: AdminPanelView,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundView
@@ -54,18 +61,29 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  // history: createWebHashHistory(import.meta.env.BASE_URL), // GITHUB PAGES
   routes,
 });
 
+// Navegação de guarda para autenticação e autorização (roles)
 router.beforeEach((to, from, next) => {
-  const loggedIn = localStorage.getItem('access_token');
+  const authStore = useAuthStore();
+
+  const loggedIn = authStore.isLoggedIn;
+  const userRole = authStore.currentUser?.role;
 
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    // Se a rota exige autenticação e o utilizador não está logado
     next('/login');
   } else if (to.matched.some(record => record.meta.guest) && loggedIn) {
+    // Se a rota é para convidados (login/registro) e o utilizador já está logado
     next('/');
-  } else {
+  } else if (to.matched.some(record => record.meta.requiresAdmin) && userRole !== 'admin') {
+    // Se a rota exige role de admin e o utilizador não é admin
+    // Redireciona para o dashboard ou uma página de acesso negado
+    next('/'); // Ou '/access-denied' se tiver uma página específica
+    alert('Acesso negado. Apenas administradores podem acessar esta página.'); // Apenas para feedback rápido
+  }
+  else {
     next();
   }
 });

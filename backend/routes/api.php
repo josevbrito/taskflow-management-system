@@ -29,4 +29,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+    Route::middleware('can:admin')->group(function () {
+        Route::get('/admin/users', [UserController::class, 'adminIndex']);
+    });
 });
