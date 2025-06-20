@@ -11,30 +11,104 @@ class UserController extends Controller
 {
     use AuthorizesRequests;
 
-
     /**
-     * Retorna uma lista de todos os usuários.
+     * Retorna uma lista paginada de usuários com filtro de pesquisa.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::select('id', 'name', 'email', 'role', 'avatar')->get();
+        $this->authorize('viewAny', User::class);
+
+        $query = User::query();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+        
+        if ($request->has('all') && $request->all == 'true') {
+            return response()->json($query->select('id', 'name', 'email', 'role', 'avatar')->get());
+        }
+
+        $users = $query->orderBy('name', 'asc')
+                       ->paginate(5);
+
         return response()->json($users);
     }
 
     /**
-     * Retorna uma lista de todos os usuários (APENAS para administradores).
-     */
-    public function adminIndex()
-    {
-        $users = User::all();
-        return response()->json($users);
-    }
-
-    /**
-     * Mostra o perfil de um usuário específico.
+     * Retorna o perfil de um usuário específico.
      */
     public function show(User $user)
     {
+        $this->authorize('view', $user);
         return response()->json($user);
+    }
+
+    /**
+     * Cria um novo usuário.
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('create', User::class);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'is_active' => true,
+        ]);
+
+        return response()->json($user, 201);
+    }
+
+    /**
+     * Atualiza um usuário existente.
+     */
+    public function update(Request $request, User $userModel)
+    {
+        $this->authorize('update', $userModel);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userModel->id)],
+            'role' => ['required', Rule::in(['admin', 'manager', 'user'])],
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $userModel->name = $request->name;
+        $userModel->email = $request->email;
+        $userModel->role = $request->role;
+        $userModel->is_active = $request->input('is_active', $userModel->is_active);
+
+        if ($request->filled('password')) {
+            $userModel->password = Hash::make($request->password);
+        }
+
+        $userModel->save();
+
+        return response()->json($userModel);
+    }
+
+    /**
+     * Exclui um usuário.
+     */
+    public function destroy(User $userModel)
+    {
+        $this->authorize('delete', $userModel);
+
+        $userModel->delete();
+
+        return response()->json(null, 204);
     }
 }

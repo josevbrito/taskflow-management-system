@@ -42,6 +42,10 @@ class ProjectController extends Controller
             });
         }
 
+        if ($request->has('all') && $request->get('all') == 'true') {
+            return response()->json($query->with('user', 'members.user')->get());
+        }
+
         // Retorna os resultados paginados (5 itens por página) e carrega os relacionamentos
         $projects = $query->with('user', 'members.user')
                           ->orderBy('created_at', 'desc')

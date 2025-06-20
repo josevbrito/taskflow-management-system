@@ -24,10 +24,11 @@
               <span class="font-medium hidden sm:inline">Tarefas</span>
             </router-link>
           </li>
-          <li v-if="authStore.currentUser && authStore.currentUser.role === 'admin'">
-            <router-link to="/admin-panel" class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">
-              <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-              <span class="font-medium hidden sm:inline">Painel Admin</span>
+          <!-- Link para a nova aba de Usuários (visível para Admin e Manager) -->
+          <li v-if="authStore.currentUser && (authStore.currentUser.role === 'admin' || authStore.currentUser.role === 'manager')">
+            <router-link to="/users" class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">
+              <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h2a2 2 0 002-2V7a2 2 0 00-2-2h-2V3a1 1 0 00-1-1H8a1 1 0 00-1 1v2H5a2 2 0 00-2 2v11a2 2 0 002 2h2v-2a2 2 0 012-2h6a2 2 0 012 2v2zM9 16H8a2 2 0 00-2 2v2H5a2 2 0 01-2-2v-11a2 2 0 012-2h2V3h8v2h2a2 2 0 012 2v11a2 2 0 01-2 2h-2v-2a2 2 0 00-2-2H9a2 2 0 00-2 2v2z"></path></svg>
+              <span class="font-medium hidden sm:inline">Usuários</span>
             </router-link>
           </li>
         </ul>
@@ -37,8 +38,8 @@
     <!-- User Info and Logout -->
     <div class="flex items-center space-x-4">
       <router-link to="/profile" class="flex items-center space-x-2 cursor-pointer group">
-        <span class="text-gray-300 hidden md:inline group-hover:text-white transition-colors duration-200">Olá, {{ currentUser?.name || 'Utilizador' }}!</span>
-        <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400 group-hover:border-white transition-colors duration-200" :src="currentUser?.avatar || 'https://placehold.co/40x40/cccccc/000000?text=AU'" alt="Avatar do Utilizador" />
+        <span class="text-gray-300 hidden md:inline group-hover:text-white transition-colors duration-200">{{ currentUser?.name || 'Usuário' }}!</span>
+        <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-400 group-hover:border-white transition-colors duration-200" :src="currentUser?.avatar || 'https://placehold.co/40x40/cccccc/000000?text=AU'" alt="Avatar do Usuário" />
       </router-link>
       <button @click="handleLogout" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-3 rounded-md transition-colors duration-200 text-sm">
         <svg class="w-4 h-4 mr-1 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>

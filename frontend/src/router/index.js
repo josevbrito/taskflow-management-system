@@ -5,7 +5,7 @@ import DashboardView from '../views/DashboardView.vue';
 import TasksView from '../views/TasksView.vue';
 import ProjectsView from '../views/ProjectsView.vue';
 import ProfileView from '../views/ProfileView.vue';
-import AdminPanelView from '../views/AdminPanelView.vue';
+import UsersView from '../views/UsersView.vue'; // Nova importação
 import NotFoundView from '../views/NotFoundView.vue';
 import { useAuthStore } from '../stores/auth';
 
@@ -47,10 +47,10 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin-panel',
-    name: 'admin-panel',
-    component: AdminPanelView,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    path: '/users',
+    name: 'users',
+    component: UsersView,
+    meta: { requiresAuth: true, requiresAdminOrManager: true }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -64,7 +64,6 @@ const router = createRouter({
   routes,
 });
 
-// Navegação de guarda para autenticação e autorização (roles)
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
@@ -72,18 +71,17 @@ router.beforeEach((to, from, next) => {
   const userRole = authStore.currentUser?.role;
 
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    // Se a rota exige autenticação e o usuário não está logado
     next('/login');
   } else if (to.matched.some(record => record.meta.guest) && loggedIn) {
-    // Se a rota é para convidados (login/registro) e o usuário já está logado
     next('/');
-  } else if (to.matched.some(record => record.meta.requiresAdmin) && userRole !== 'admin') {
-    // Se a rota exige role de admin e o usuário não é admin
-    // Redireciona para o dashboard ou uma página de acesso negado
-    next('/'); // Ou '/access-denied' se tiver uma página específica
-    alert('Acesso negado. Apenas administradores podem acessar esta página.'); // Apenas para feedback rápido
-  }
-  else {
+  } else if (to.matched.some(record => record.meta.requiresAdminOrManager)) {
+    if (userRole === 'admin' || userRole === 'manager') {
+      next();
+    } else {
+      alert('Acesso negado. Apenas administradores e gestores podem acessar esta página.');
+      next('/');
+    }
+  } else {
     next();
   }
 });
