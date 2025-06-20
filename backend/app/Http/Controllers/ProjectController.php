@@ -4,24 +4,35 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Validation\Rule; 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
+    public function __construct()
+    {
+        // Aplica a ProjectPolicy para autorizar automaticamente os métodos CRUD
+        $this->authorizeResource(Project::class, 'project');
+    }
 
     /**
-     * Retorna uma lista de projetos do usuário autenticado.
+     * Retorna uma lista de projetos.
      */
     public function index()
     {
-
-        $projects = Auth::user()->projects() 
-                        ->orWhereHas('members', function ($query) {
-                            $query->where('user_id', Auth::id());
-                        })
-                        ->with('user', 'members.user') 
-                        ->get();
+        $user = Auth::user();
+        // Verifica o papel do usuário e retorna os projetos adequados
+        if ($user->isUser()) {
+            $projects = Project::where('user_id', $user->id)
+                            ->orWhereHas('members', function ($query) use ($user) {
+                                $query->where('user_id', $user->id);
+                            })
+                            ->with('user', 'members.user')
+                            ->get();
+        } else {
+            // Admin e Manager podem ver todos os projetos
+            $projects = Project::with('user', 'members.user')->get();
+        }
 
         return response()->json($projects);
     }
@@ -43,6 +54,7 @@ class ProjectController extends Controller
 
         $project = Auth::user()->projects()->create($request->all());
 
+        // Adiciona o criador como membro do projeto por padrão
         $project->members()->create([
             'user_id' => Auth::id(),
             'role' => 'owner',
@@ -56,10 +68,6 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        if ($project->user_id !== Auth::id() && !$project->members->contains('user_id', Auth::id())) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         return response()->json($project->load('user', 'tasks', 'members.user'));
     }
 
@@ -68,10 +76,6 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        if ($project->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized to update this project.'], 403);
-        }
-
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -92,14 +96,6 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        // Apenas o criador ou um admin pode deletar
-        if ($project->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized to delete this project.'], 403);
-        }
-
-        $projectName = $project->name;
-        $projectId = $project->id;
-
         $project->tasks()->delete();
         $project->members()->delete();
 

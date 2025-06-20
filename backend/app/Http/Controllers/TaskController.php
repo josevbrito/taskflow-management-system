@@ -11,6 +11,11 @@ use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
+    public function __construct()
+    {
+        // Aplica a TaskPolicy para autorizar automaticamente os métodos CRUD
+        $this->authorizeResource(Task::class, 'task');
+    }
 
     /**
      * Retorna uma lista de tarefas do usuário autenticado ou de projetos que ele participa.
@@ -19,10 +24,20 @@ class TaskController extends Controller
     {
         $user = Auth::user();
 
-        // Tarefas atribuídas diretamente ao usuário
-        $tasks = $user->assignedTasks()
-                    ->with('project', 'assignedUser') 
-                    ->get();
+        if ($user->isManager()) {
+            $tasks = Task::with('project', 'assignedUser', 'createdBy')->get();
+        } else {
+            $tasks = Task::where('assigned_to', $user->id)
+                         ->orWhere('created_by', $user->id)
+                         ->orWhereHas('project', function ($query) use ($user) {
+                             $query->where('user_id', $user->id)
+                                   ->orWhereHas('members', function ($memberQuery) use ($user) {
+                                       $memberQuery->where('user_id', $user->id);
+                                   });
+                         })
+                         ->with('project', 'assignedUser', 'createdBy')
+                         ->get();
+        }
 
         return response()->json($tasks);
     }
@@ -44,8 +59,9 @@ class TaskController extends Controller
 
         // Garante que o usuário autenticado tem permissão para criar tarefa neste projeto
         $project = Project::find($request->project_id);
-        if (!$project || ($project->user_id !== Auth::id() && !$project->members->contains('user_id', Auth::id()))) {
-            return response()->json(['message' => 'Unauthorized to create task in this project.'], 403);
+        if (!$project || (!Auth::user()->isAdmin() && !Auth::user()->isManager() &&
+            $project->user_id !== Auth::id() && !$project->members->contains('user_id', Auth::id()))) {
+            return response()->json(['message' => 'Unauthorized: You do not have access to this project.'], 403);
         }
 
         $taskData = $request->all();
@@ -53,7 +69,7 @@ class TaskController extends Controller
 
         $task = Task::create($taskData);
 
-        return response()->json($task->load('project', 'assignedUser'), 201);
+        return response()->json($task->load('project', 'assignedUser', 'createdBy'), 201);
     }
 
     /**
@@ -61,13 +77,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        // Garante que o usuário tem acesso à tarefa (criou, atribuído, ou membro do projeto)
-        $user = Auth::user();
-        if ($task->assigned_to !== $user->id && $task->project->user_id !== $user->id && !$task->project->members->contains('user_id', $user->id)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return response()->json($task->load('project', 'assignedUser', 'comments.user', 'timeLogs.user', 'dependencies', 'fileUploads'));
+        return response()->json($task->load('project', 'assignedUser', 'createdBy', 'comments.user', 'timeLogs.user', 'dependencies', 'dependentTasks', 'fileUploads'));
     }
 
     /**
@@ -75,12 +85,6 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        // Garante que o usuário tem permissão para atualizar
-        $user = Auth::user();
-        if ($task->assigned_to !== $user->id && $task->project->user_id !== $user->id && Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized to update this task.'], 403);
-        }
-
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -91,9 +95,16 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ]);
 
+        // Validação adicional de acesso ao projeto
+        $project = Project::find($request->project_id);
+        if (!$project || (!Auth::user()->isAdmin() && !Auth::user()->isManager() &&
+            $project->user_id !== Auth::id() && !$project->members->contains('user_id', Auth::id()))) {
+            return response()->json(['message' => 'Unauthorized: You do not have access to the target project.'], 403);
+        }
+
         $task->update($request->all());
 
-        return response()->json($task->load('project', 'assignedUser'));
+        return response()->json($task->load('project', 'assignedUser', 'createdBy'));
     }
 
     /**
@@ -101,16 +112,6 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        // Garante que o usuário tem permissão para excluir
-        $user = Auth::user();
-        if ($task->project->user_id !== $user->id && Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized to delete this task.'], 403);
-        }
-
-        $taskTitle = $task->title;
-        $taskId = $task->id;
-        $projectName = $task->project->name;
-
         $task->comments()->delete();
         $task->timeLogs()->delete();
         $task->dependencies()->detach();
